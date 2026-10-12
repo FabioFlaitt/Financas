@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             x:Class="FinanceApp.Mobile.Views.TripStartPage"
+             x:DataType="vm:TripStartViewModel"
+             Title="Nova viagem"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+            <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}"
+                    BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 10" Padding="12">
+                <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" />
+            </Border>
+
+            <Label Text="Nome da viagem" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding Name}" Placeholder="Ex.: São Paulo → Rio" />
+
+            <Label Text="Origem (opcional)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding Origin}" />
+
+            <Label Text="Destino (opcional)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding Destination}" />
+
+            <Label Text="Veículo (opcional)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding VehicleName}" Placeholder="Ex.: Corolla" />
+
+            <Label Text="Odômetro inicial em km (opcional)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding StartOdometerText}" Keyboard="Numeric" Placeholder="Ex.: 45230" />
+
+            <Label Text="Preço do combustível por litro (opcional)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding FuelPriceText}" Keyboard="Numeric" Placeholder="Ex.: 5,89" />
+
+            <Button Text="Iniciar viagem" Command="{Binding StartCommand}" BackgroundColor="#0D47A1"
+                    TextColor="White" CornerRadius="12" Margin="0,8,0,0" />
+
+            <Label Text="Ao iniciar, você poderá ativar o rastreamento por GPS para mapear a rota e os quilômetros."
+                   FontSize="11" TextColor="#919191" HorizontalTextAlignment="Center" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#0D47A1" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

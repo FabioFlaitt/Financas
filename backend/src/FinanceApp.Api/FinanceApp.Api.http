@@ -1,0 +1,50 @@
+@host = http://localhost:5219
+
+### Health
+GET {{host}}/api/health
+
+### Login com o usuário de demonstração
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "demo@financas.app",
+  "password": "Demo@12345"
+}
+
+### Guarda o token retornado pelo login
+@token = {{login.response.body.accessToken}}
+
+### Dashboard (mês atual)
+GET {{host}}/api/dashboard
+Authorization: Bearer {{token}}
+
+### Lançamentos do mês
+GET {{host}}/api/transactions?pageSize=20
+Authorization: Bearer {{token}}
+
+### Criar uma despesa
+POST {{host}}/api/transactions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Padaria",
+  "amount": 23.50,
+  "type": "Expense",
+  "status": "Confirmed",
+  "transactionDate": "2026-10-12"
+}
+
+### Contas
+GET {{host}}/api/accounts
+Authorization: Bearer {{token}}
+
+### Categorias
+GET {{host}}/api/categories
+Authorization: Bearer {{token}}
+
+### Provedor de integração bancária (modo demo)
+GET {{host}}/api/banking/provider
+Authorization: Bearer {{token}}

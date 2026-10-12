@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:models="clr-namespace:FinanceApp.Mobile.Models"
+             x:Class="FinanceApp.Mobile.Views.BudgetPage"
+             x:DataType="vm:BudgetViewModel"
+             Title="Orçamento"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Novo" Clicked="OnAddClicked" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Navegador de mês -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="8,8,8,0">
+            <Button Grid.Column="0" Text="‹" FontSize="20" WidthRequest="44" HeightRequest="40" Padding="0"
+                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light=#0D47A1, Dark=#90CAF9}"
+                    Command="{Binding PreviousMonthCommand}" />
+            <Label Grid.Column="1" Text="{Binding MonthLabel}" FontSize="17" FontAttributes="Bold"
+                   HorizontalTextAlignment="Center" VerticalOptions="Center"
+                   TextColor="{AppThemeBinding Light=#0D47A1, Dark=#90CAF9}" />
+            <Button Grid.Column="2" Text="›" FontSize="20" WidthRequest="44" HeightRequest="40" Padding="0"
+                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light=#0D47A1, Dark=#90CAF9}"
+                    Command="{Binding NextMonthCommand}" />
+        </Grid>
+
+        <!-- Resumo do mês -->
+        <Border Grid.Row="1" Margin="16,8,16,4" Padding="16" BackgroundColor="#0D47A1" StrokeShape="RoundRectangle 14">
+            <VerticalStackLayout Spacing="6">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="Gasto do mês" FontSize="12" TextColor="#BBD4F5" VerticalOptions="Center" />
+                    <Label Grid.Column="1" Text="{Binding UsedPercentLabel}" FontSize="12" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" />
+                </Grid>
+                <Label Text="{Binding TotalSpentLabel}" FontSize="24" FontAttributes="Bold" TextColor="White" />
+                <ProgressBar Progress="{Binding TotalProgress}" ProgressColor="White" />
+                <Grid ColumnDefinitions="*,*">
+                    <Label Grid.Column="0" Text="{Binding TotalLimitLabel, StringFormat='Limite: {0}'}" FontSize="11" TextColor="#BBD4F5" />
+                    <Label Grid.Column="1" Text="{Binding TotalRemainingLabel, StringFormat='Resta: {0}'}" FontSize="11"
+                           HorizontalTextAlignment="End" TextColor="#BBD4F5" />
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+            <CollectionView ItemsSource="{Binding Items}" SelectionMode="None" Margin="0,4,0,0">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="30" VerticalOptions="Center" Spacing="6">
+                        <Label Text="🎯" FontSize="40" HorizontalOptions="Center" />
+                        <Label Text="Nenhum orçamento neste mês" HorizontalOptions="Center" TextColor="#6E6E6E" />
+                        <Label Text="Toque em “Novo” para definir um limite." FontSize="12" HorizontalOptions="Center" TextColor="#919191" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:BudgetItem">
+                        <Border Margin="12,5" Padding="14" StrokeShape="RoundRectangle 12"
+                                Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnItemTapped" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="8">
+                                <Grid ColumnDefinitions="14,*,Auto" ColumnSpacing="8">
+                                    <BoxView Grid.Column="0" WidthRequest="12" HeightRequest="12" CornerRadius="3"
+                                             Color="{Binding CategoryColorHex, Converter={StaticResource HexColor}}" VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{Binding CategoryName}" FontSize="15" FontAttributes="Bold"
+                                           VerticalOptions="Center" LineBreakMode="TailTruncation"
+                                           TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                                    <Label Grid.Column="2" Text="{Binding UsedPercent, Converter={StaticResource Percent}}"
+                                           FontSize="13" FontAttributes="Bold" VerticalOptions="Center"
+                                           TextColor="{Binding BarColorHex, Converter={StaticResource HexColor}}" />
+                                </Grid>
+                                <ProgressBar Progress="{Binding ProgressFraction}"
+                                             ProgressColor="{Binding BarColorHex, Converter={StaticResource HexColor}}" />
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0" FontSize="12" VerticalOptions="Center"
+                                           Text="{Binding SpentAmount, Converter={StaticResource Currency}}"
+                                           TextColor="{AppThemeBinding Light=#6E6E6E, Dark=#9AA4AF}" />
+                                    <Label Grid.Column="1" FontSize="12" VerticalOptions="Center"
+                                           Text="{Binding LimitAmount, Converter={StaticResource Currency}, StringFormat='de {0}'}"
+                                           TextColor="{AppThemeBinding Light=#6E6E6E, Dark=#9AA4AF}" />
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

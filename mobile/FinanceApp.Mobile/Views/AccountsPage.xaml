@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:models="clr-namespace:FinanceApp.Mobile.Models"
+             x:Class="FinanceApp.Mobile.Views.AccountsPage"
+             x:DataType="vm:AccountsViewModel"
+             Title="Contas"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Nova" Clicked="OnAddClicked" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Margin="16,12,16,4" Padding="16" BackgroundColor="#0D47A1" StrokeShape="RoundRectangle 14">
+            <VerticalStackLayout>
+                <Label Text="Saldo consolidado" FontSize="12" TextColor="#BBD4F5" />
+                <Label Text="{Binding TotalLabel}" FontSize="24" FontAttributes="Bold" TextColor="White" />
+            </VerticalStackLayout>
+        </Border>
+
+        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+            <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="30" VerticalOptions="Center" Spacing="6">
+                        <Label Text="🏦" FontSize="40" HorizontalOptions="Center" />
+                        <Label Text="Nenhuma conta cadastrada" HorizontalOptions="Center" TextColor="#6E6E6E" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:AccountDto">
+                        <Grid Padding="16,12" ColumnDefinitions="6,*,Auto" ColumnSpacing="12"
+                              BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnItemTapped" />
+                            </Grid.GestureRecognizers>
+                            <BoxView Grid.Column="0" Color="{Binding ColorHex, Converter={StaticResource HexColor}}" CornerRadius="3" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="{Binding Name}" FontSize="15" FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                                <Label Text="{Binding TypeLabel}" FontSize="11" TextColor="#919191" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" VerticalOptions="Center" FontAttributes="Bold"
+                                   Text="{Binding CurrentBalance, Converter={StaticResource Currency}}"
+                                   TextColor="{Binding CurrentBalance, Converter={StaticResource AmountColor}}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

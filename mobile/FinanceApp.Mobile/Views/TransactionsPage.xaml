@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:models="clr-namespace:FinanceApp.Mobile.Models"
+             x:Class="FinanceApp.Mobile.Views.TransactionsPage"
+             x:DataType="vm:TransactionsViewModel"
+             Title="Lançamentos"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Novo" Clicked="OnAddClicked" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Navegação de mês + totais -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Padding="16,12" ColumnSpacing="8"
+              BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}">
+            <Button Grid.Column="0" Text="‹" Command="{Binding PreviousMonthCommand}" WidthRequest="44"
+                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light=#0D47A1, Dark=#90CAF9}" FontSize="22" />
+            <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                <Label Text="{Binding MonthLabel}" FontAttributes="Bold" HorizontalOptions="Center"
+                       TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Label Text="{Binding IncomeLabel}" FontSize="12" TextColor="#2E7D32" />
+                    <Label Text="{Binding ExpenseLabel}" FontSize="12" TextColor="#C62828" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+            <Button Grid.Column="2" Text="›" Command="{Binding NextMonthCommand}" WidthRequest="44"
+                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light=#0D47A1, Dark=#90CAF9}" FontSize="22" />
+        </Grid>
+
+        <SearchBar Grid.Row="1" Placeholder="Pesquisar por descrição ou estabelecimento"
+                   Text="{Binding SearchText}" SearchCommand="{Binding SearchCommand}" />
+
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+            <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="30" VerticalOptions="Center" Spacing="8">
+                        <Label Text="🧾" FontSize="42" HorizontalOptions="Center" />
+                        <Label Text="Nenhum lançamento neste mês" HorizontalOptions="Center"
+                               TextColor="#6E6E6E" />
+                        <Label Text="Toque em “Novo” para adicionar." HorizontalOptions="Center"
+                               FontSize="12" TextColor="#919191" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:TransactionDto">
+                        <Grid Padding="16,12" ColumnDefinitions="6,*,Auto" ColumnSpacing="12"
+                              BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnItemTapped" />
+                            </Grid.GestureRecognizers>
+                            <BoxView Grid.Column="0" Color="{Binding CategoryColorHex, Converter={StaticResource HexColor}}"
+                                     CornerRadius="3" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="{Binding Description}" FontSize="15"
+                                       TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                                <Label FontSize="11" TextColor="#919191">
+                                    <Label.Text>
+                                        <MultiBinding StringFormat="{}{0} • {1}">
+                                            <Binding Path="CategoryName" TargetNullValue="Sem categoria" />
+                                            <Binding Path="StatusLabel" />
+                                        </MultiBinding>
+                                    </Label.Text>
+                                </Label>
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" Text="{Binding ., Converter={StaticResource TxAmount}}"
+                                   FontAttributes="Bold" VerticalOptions="Center"
+                                   TextColor="{Binding Type, Converter={StaticResource TxColor}}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

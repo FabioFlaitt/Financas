@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell x:Class="FinanceApp.Mobile.AppShell"
+       xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:views="clr-namespace:FinanceApp.Mobile.Views"
+       Shell.FlyoutBehavior="Disabled"
+       Title="Meu Controle Financeiro">
+
+    <TabBar>
+        <ShellContent Title="Painel" ContentTemplate="{DataTemplate views:DashboardPage}" Route="dashboard" />
+        <ShellContent Title="Lançamentos" ContentTemplate="{DataTemplate views:TransactionsPage}" Route="transactions" />
+        <ShellContent Title="Gráficos" ContentTemplate="{DataTemplate views:ChartsPage}" Route="charts" />
+        <ShellContent Title="Cartões" ContentTemplate="{DataTemplate views:CardsPage}" Route="cards" />
+        <ShellContent Title="Config." ContentTemplate="{DataTemplate views:SettingsPage}" Route="settings" />
+    </TabBar>
+</Shell>

@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16
+    container_name: financas-db
+    environment:
+      POSTGRES_DB: financas
+      POSTGRES_USER: financas
+      POSTGRES_PASSWORD: financas
+    ports:
+      - "5432:5432"
+    volumes:
+      - financas_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U financas -d financas"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: financas-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=financas;Username=financas;Password=financas"
+      # ATENÇÃO: troque esta chave por um segredo forte e aleatório em produção.
+      Jwt__SigningKey: "troque-esta-chave-em-producao-por-um-segredo-forte-aleatorio-123456"
+      Database__AutoMigrate: "true"
+      Database__SeedDemoData: "true"
+    ports:
+      # host 5219 -> container 8080 (casa com a BaseUrl padrão do app mobile)
+      - "5219:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  financas_pgdata:

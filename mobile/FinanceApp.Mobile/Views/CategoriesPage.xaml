@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:models="clr-namespace:FinanceApp.Mobile.Models"
+             x:Class="FinanceApp.Mobile.Views.CategoriesPage"
+             x:DataType="vm:CategoriesViewModel"
+             Title="Categorias"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Nova" Clicked="OnAddClicked" />
+    </ContentPage.ToolbarItems>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="30" VerticalOptions="Center" Spacing="6">
+                    <Label Text="🏷️" FontSize="40" HorizontalOptions="Center" />
+                    <Label Text="Nenhuma categoria" HorizontalOptions="Center" TextColor="#6E6E6E" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:CategoryDto">
+                    <Grid Padding="16,14" ColumnDefinitions="16,*,Auto" ColumnSpacing="12"
+                          BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnItemTapped" />
+                        </Grid.GestureRecognizers>
+                        <BoxView Grid.Column="0" WidthRequest="14" HeightRequest="14" CornerRadius="7"
+                                 Color="{Binding ColorHex, Converter={StaticResource HexColor}}" VerticalOptions="Center" />
+                        <Label Grid.Column="1" Text="{Binding Name}" FontSize="15" VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                        <Label Grid.Column="2" Text="{Binding NatureLabel}" FontSize="11" VerticalOptions="Center" TextColor="#919191" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
+</ContentPage>

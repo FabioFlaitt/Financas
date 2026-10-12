@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             x:Class="FinanceApp.Mobile.Views.RecurringEditPage"
+             x:DataType="vm:RecurringEditViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+            <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}"
+                    BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 10" Padding="12">
+                <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" />
+            </Border>
+
+            <Label Text="Descrição" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding Description}" Placeholder="Ex.: Aluguel" />
+
+            <Label Text="Valor (R$)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding AmountText}" Keyboard="Numeric" Placeholder="0,00" />
+
+            <Label Text="Tipo" FontSize="12" TextColor="#6E6E6E" />
+            <Picker ItemsSource="{Binding Types}" SelectedItem="{Binding SelectedType}" />
+
+            <Label Text="Frequência" FontSize="12" TextColor="#6E6E6E" />
+            <Picker ItemsSource="{Binding Frequencies}" SelectedItem="{Binding SelectedFrequency}" />
+
+            <Label Text="Início" FontSize="12" TextColor="#6E6E6E" />
+            <DatePicker Date="{Binding StartDate}" Format="dd/MM/yyyy" />
+
+            <HorizontalStackLayout Spacing="10">
+                <Switch IsToggled="{Binding IsActive}" />
+                <Label Text="Ativa" VerticalOptions="Center" TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+            </HorizontalStackLayout>
+
+            <Button Text="Salvar" Command="{Binding SaveCommand}" BackgroundColor="#0D47A1" TextColor="White" CornerRadius="12" Margin="0,8,0,0" />
+            <Button Text="Excluir" Command="{Binding DeleteCommand}" IsVisible="{Binding IsEditing}"
+                    BackgroundColor="Transparent" TextColor="#C62828" BorderColor="#C62828" BorderWidth="1" CornerRadius="12" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#0D47A1" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

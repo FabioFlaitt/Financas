@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+             x:Class="FinanceApp.Mobile.Views.TripDetailPage"
+             x:DataType="vm:TripDetailViewModel"
+             Title="{Binding TripName}"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <maps:Map Grid.Row="0" x:Name="TripMap" IsShowingUser="True" MapType="Street" />
+
+        <ScrollView Grid.Row="1" MaximumHeightRequest="340">
+            <VerticalStackLayout Padding="16" Spacing="12">
+
+                <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}"
+                        BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 10" Padding="10">
+                    <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" FontSize="12" />
+                </Border>
+
+                <!-- Resumo -->
+                <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+                        <Label Text="Distância" FontSize="11" TextColor="#919191" />
+                        <Label Text="{Binding DistanceLabel}" FontAttributes="Bold" FontSize="16"
+                               TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                        <Label Text="Custo total" FontSize="11" TextColor="#919191" />
+                        <Label Text="{Binding CostLabel}" FontAttributes="Bold" FontSize="16" TextColor="#0D47A1" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="2">
+                        <Label Text="Custo por km" FontSize="11" TextColor="#919191" />
+                        <Label Text="{Binding CostPerKmLabel}" FontAttributes="Bold" FontSize="16"
+                               TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="0">
+                        <Label Text="Pedágios" FontSize="11" TextColor="#919191" />
+                        <Label Text="{Binding TollLabel}" FontSize="13"
+                               TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="1">
+                        <Label Text="Combustível" FontSize="11" TextColor="#919191" />
+                        <Label Text="{Binding FuelLabel}" FontSize="13"
+                               TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="2">
+                        <Label Text="Duração" FontSize="11" TextColor="#919191" />
+                        <Label Text="{Binding DurationLabel}" FontSize="13"
+                               TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Ações (apenas em viagem em andamento) -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsInProgress}">
+                    <Button x:Name="TrackButton" Text="▶ Rastrear rota (GPS)" Clicked="OnToggleTracking"
+                            BackgroundColor="#1B5E20" TextColor="White" CornerRadius="12" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button Grid.Column="0" Text="Pedágio" Clicked="OnAddToll"
+                                BackgroundColor="#0D47A1" TextColor="White" CornerRadius="12" />
+                        <Button Grid.Column="1" Text="Combustível" Clicked="OnAddFuel"
+                                BackgroundColor="#EF6C00" TextColor="White" CornerRadius="12" />
+                    </Grid>
+                    <Button Text="Encerrar viagem" Clicked="OnFinish"
+                            BackgroundColor="Transparent" TextColor="#C62828" BorderColor="#C62828"
+                            BorderWidth="1" CornerRadius="12" />
+                </VerticalStackLayout>
+
+                <Label IsVisible="{Binding IsInProgress, Converter={StaticResource InvertBool}}"
+                       Text="Viagem encerrada." HorizontalOptions="Center" TextColor="#6E6E6E" />
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#0D47A1" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

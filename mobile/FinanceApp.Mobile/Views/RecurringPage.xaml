@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:models="clr-namespace:FinanceApp.Mobile.Models"
+             x:Class="FinanceApp.Mobile.Views.RecurringPage"
+             x:DataType="vm:RecurringViewModel"
+             Title="Recorrências"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Gerar" Command="{Binding GenerateCommand}" />
+        <ToolbarItem Text="Nova" Clicked="OnAddClicked" />
+    </ContentPage.ToolbarItems>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="30" VerticalOptions="Center" Spacing="6">
+                    <Label Text="🔁" FontSize="40" HorizontalOptions="Center" />
+                    <Label Text="Nenhuma recorrência" HorizontalOptions="Center" TextColor="#6E6E6E" />
+                    <Label Text="Cadastre aluguel, energia, salário, assinaturas…" HorizontalOptions="Center"
+                           FontSize="12" TextColor="#919191" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:RecurringTransactionDto">
+                    <Grid Padding="16,12" ColumnDefinitions="*,Auto" ColumnSpacing="12"
+                          BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnItemTapped" />
+                        </Grid.GestureRecognizers>
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{Binding Description}" FontSize="15" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                            <Label FontSize="11" TextColor="#919191">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="{}{0} • {1}">
+                                        <Binding Path="FrequencyLabel" />
+                                        <Binding Path="TypeLabel" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" VerticalOptions="Center" FontAttributes="Bold"
+                               Text="{Binding Amount, Converter={StaticResource Currency}}"
+                               TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
+</ContentPage>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:models="clr-namespace:FinanceApp.Mobile.Models"
+             x:Class="FinanceApp.Mobile.Views.TripsPage"
+             x:DataType="vm:TripsViewModel"
+             Title="Viagens"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Nova viagem" Clicked="OnNewClicked" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" IsVisible="{Binding IsDemoOrOffline}" Margin="16,12,16,0"
+                BackgroundColor="#FFF3CD" Stroke="#F9A825" StrokeShape="RoundRectangle 10" Padding="12">
+            <Label Text="Conecte-se ao servidor para registrar e sincronizar suas viagens."
+                   FontSize="12" TextColor="#8A6D00" />
+        </Border>
+
+        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+            <CollectionView ItemsSource="{Binding Trips}" SelectionMode="None" Margin="0,8,0,0">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="30" VerticalOptions="Center" Spacing="8">
+                        <Label Text="🚗" FontSize="46" HorizontalOptions="Center" />
+                        <Label Text="Nenhuma viagem ainda" HorizontalOptions="Center" TextColor="#6E6E6E" />
+                        <Label Text="Toque em “Nova viagem” para começar a mapear pedágios, km e combustível."
+                               HorizontalOptions="Center" HorizontalTextAlignment="Center" FontSize="12" TextColor="#919191" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:TripDto">
+                        <Border Margin="16,6" BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}"
+                                Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}" StrokeShape="RoundRectangle 14" Padding="16">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnTripTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="6">
+                                <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="2">
+                                    <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                                    <Label Text="{Binding StatusLabel}" FontSize="11" TextColor="#919191" />
+                                </VerticalStackLayout>
+                                <Label Grid.Row="0" Grid.Column="1" VerticalOptions="Center"
+                                       Text="{Binding Summary.TotalCost, Converter={StaticResource Currency}}"
+                                       FontAttributes="Bold" TextColor="#0D47A1" />
+                                <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2" Spacing="16">
+                                    <Label FontSize="12" TextColor="#6E6E6E"
+                                           Text="{Binding Summary.DistanceKm, StringFormat='{0:N1} km'}" />
+                                    <Label FontSize="12" TextColor="#6E6E6E"
+                                           Text="{Binding Summary.CostPerKm, Converter={StaticResource Currency}}" />
+                                    <Label FontSize="12" TextColor="#6E6E6E"
+                                           Text="{Binding Summary.TollCount, StringFormat='{0} pedágio(s)'}" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

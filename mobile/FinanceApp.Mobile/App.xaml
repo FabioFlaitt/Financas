@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:FinanceApp.Mobile"
+             xmlns:conv="clr-namespace:FinanceApp.Mobile.Converters"
+             x:Class="FinanceApp.Mobile.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:CurrencyConverter x:Key="Currency" />
+            <conv:SignedCurrencyConverter x:Key="SignedCurrency" />
+            <conv:AmountColorConverter x:Key="AmountColor" />
+            <conv:PercentConverter x:Key="Percent" />
+            <conv:InvertedBoolConverter x:Key="InvertBool" />
+            <conv:IsNotNullConverter x:Key="IsNotNull" />
+            <conv:HexColorConverter x:Key="HexColor" />
+            <conv:TransactionAmountConverter x:Key="TxAmount" />
+            <conv:TransactionTypeColorConverter x:Key="TxColor" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

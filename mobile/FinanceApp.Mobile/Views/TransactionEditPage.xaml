@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:models="clr-namespace:FinanceApp.Mobile.Models"
+             x:Class="FinanceApp.Mobile.Views.TransactionEditPage"
+             x:DataType="vm:TransactionEditViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}"
+                    BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 10" Padding="12">
+                <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" />
+            </Border>
+
+            <Label Text="Descrição" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding Description}" Placeholder="Ex.: Supermercado" />
+
+            <Label Text="Valor (R$)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding AmountText}" Placeholder="0,00" Keyboard="Numeric" />
+
+            <Label Text="Tipo" FontSize="12" TextColor="#6E6E6E" />
+            <Picker ItemsSource="{Binding Types}" SelectedItem="{Binding SelectedType}" />
+
+            <Label Text="Data" FontSize="12" TextColor="#6E6E6E" />
+            <DatePicker Date="{Binding Date}" Format="dd/MM/yyyy" />
+
+            <Label Text="Categoria" FontSize="12" TextColor="#6E6E6E" />
+            <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" ItemDisplayBinding="{Binding Name}" />
+
+            <Label Text="Conta" FontSize="12" TextColor="#6E6E6E" />
+            <Picker ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}" ItemDisplayBinding="{Binding Name}" />
+
+            <Label Text="Situação" FontSize="12" TextColor="#6E6E6E" />
+            <Picker ItemsSource="{Binding Statuses}" SelectedItem="{Binding SelectedStatus}" />
+
+            <Label Text="Estabelecimento (opcional)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding Merchant}" />
+
+            <Label Text="Observações (opcional)" FontSize="12" TextColor="#6E6E6E" />
+            <Editor Text="{Binding Notes}" HeightRequest="80" AutoSize="TextChanges" />
+
+            <Button Text="Salvar" Command="{Binding SaveCommand}" BackgroundColor="#0D47A1" TextColor="White"
+                    CornerRadius="12" Margin="0,8,0,0" />
+
+            <Button Text="Excluir" Command="{Binding DeleteCommand}" IsVisible="{Binding IsEditing}"
+                    BackgroundColor="Transparent" TextColor="#C62828" BorderColor="#C62828" BorderWidth="1"
+                    CornerRadius="12" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#0D47A1" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

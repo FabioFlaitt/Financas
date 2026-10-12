@@ -1,0 +1,33 @@
+# Build
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+publish/
+*.user
+*.suo
+*.userprefs
+
+# .NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+.vs/
+*.binlog
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# MAUI / iOS / Android
+*.ipa
+*.app/
+*.apk
+*.aab
+Platforms/Android/Resources/Resource.designer.cs
+
+# Ambiente
+*.env
+appsettings.*.local.json
+
+# Docker volumes locais
+**/.DS_Store

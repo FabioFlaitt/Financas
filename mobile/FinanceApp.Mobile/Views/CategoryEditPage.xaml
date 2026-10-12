@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             x:Class="FinanceApp.Mobile.Views.CategoryEditPage"
+             x:DataType="vm:CategoryEditViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+            <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}"
+                    BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 10" Padding="12">
+                <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" />
+            </Border>
+
+            <HorizontalStackLayout Spacing="12">
+                <Border WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 20"
+                        BackgroundColor="{Binding ColorHex, Converter={StaticResource HexColor}}" />
+                <Label Text="Cor da categoria" VerticalOptions="Center"
+                       TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+            </HorizontalStackLayout>
+
+            <CollectionView ItemsSource="{Binding Palette}" HeightRequest="56">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Border WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 20"
+                                BackgroundColor="{Binding ., Converter={StaticResource HexColor}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnColorTapped" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="Nome" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding Name}" Placeholder="Ex.: Pets" />
+
+            <Label Text="Natureza" FontSize="12" TextColor="#6E6E6E" />
+            <Picker ItemsSource="{Binding Natures}" SelectedItem="{Binding SelectedNature}" />
+
+            <Button Text="Salvar" Command="{Binding SaveCommand}" BackgroundColor="#0D47A1" TextColor="White" CornerRadius="12" Margin="0,8,0,0" />
+            <Button Text="Excluir" Command="{Binding DeleteCommand}" IsVisible="{Binding IsEditing}"
+                    BackgroundColor="Transparent" TextColor="#C62828" BorderColor="#C62828" BorderWidth="1" CornerRadius="12" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#0D47A1" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
