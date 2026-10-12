@@ -33,9 +33,13 @@ public partial class TripsViewModel : ObservableObject
         }
         catch
         {
-            // Sem backend: mantém a lista vazia e sinaliza modo offline.
+            // Sem backend: exibe viagens de demonstração claramente identificadas.
             Trips.Clear();
-            HasTrips = false;
+            if (ApiConfig.FallbackToDemoData)
+            {
+                foreach (var t in DemoTripsData.Build()) Trips.Add(t);
+            }
+            HasTrips = Trips.Count > 0;
             IsDemoOrOffline = true;
         }
         finally { IsBusy = false; }

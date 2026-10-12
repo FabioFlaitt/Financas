@@ -15,7 +15,7 @@
     <Grid RowDefinitions="Auto,*">
         <Border Grid.Row="0" IsVisible="{Binding IsDemoOrOffline}" Margin="16,12,16,0"
                 BackgroundColor="#FFF3CD" Stroke="#F9A825" StrokeShape="RoundRectangle 10" Padding="12">
-            <Label Text="Conecte-se ao servidor para registrar e sincronizar suas viagens."
+            <Label Text="Modo demonstração: estas viagens são exemplos. Entre na sua conta para registrar e sincronizar as suas."
                    FontSize="12" TextColor="#8A6D00" />
         </Border>
 
