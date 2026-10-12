@@ -182,3 +182,29 @@ public class InvoiceTransaction
     public string? CategoryColorHex { get; set; }
     public bool IsInstallment { get; set; }
 }
+
+// ---- Importação de extratos (Fase 5) ----
+
+public class ImportItem
+{
+    public string ExternalId { get; set; } = string.Empty;
+    public DateOnly Date { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public TransactionType Type { get; set; }
+    public string TypeLabel { get; set; } = string.Empty;
+    public bool IsDuplicate { get; set; }
+}
+
+public class ImportPreview
+{
+    public int TotalParsed { get; set; }
+    public int Duplicates { get; set; }
+    public List<ImportItem> Items { get; set; } = new();
+}
+
+public class ImportResult
+{
+    public int Imported { get; set; }
+    public int SkippedDuplicates { get; set; }
+}

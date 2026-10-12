@@ -4,6 +4,7 @@ using FinanceApp.Application.Budgets;
 using FinanceApp.Application.Cards;
 using FinanceApp.Application.Categories;
 using FinanceApp.Application.Dashboard;
+using FinanceApp.Application.Imports;
 using FinanceApp.Application.Recurrences;
 using FinanceApp.Application.Reports;
 using FinanceApp.Application.Transactions;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<ICardService, CardService>();
         services.AddScoped<IInvoiceService, InvoiceService>();
+        services.AddScoped<IStatementImportService, StatementImportService>();
         return services;
     }
 }

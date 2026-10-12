@@ -118,6 +118,17 @@
                         </VerticalStackLayout>
                         <Label Grid.Column="2" Style="{StaticResource NavChevron}" />
                     </Grid>
+                    <Grid Style="{StaticResource NavRow}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnImportTapped" />
+                        </Grid.GestureRecognizers>
+                        <Label Grid.Column="0" Text="📥" Style="{StaticResource NavIcon}" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                            <Label Text="Importar extrato" Style="{StaticResource NavText}" />
+                            <Label Text="CSV ou OFX, sem duplicar lançamentos" FontSize="11" TextColor="#919191" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Style="{StaticResource NavChevron}" />
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 

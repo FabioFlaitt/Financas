@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             x:Class="FinanceApp.Mobile.Views.ImportPage"
+             x:DataType="vm:ImportViewModel"
+             Title="Importar extrato"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Configuração e análise -->
+        <VerticalStackLayout Grid.Row="0" Padding="16" Spacing="12">
+            <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}"
+                    BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 10" Padding="12">
+                <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" />
+            </Border>
+            <Border IsVisible="{Binding ResultMessage, Converter={StaticResource IsNotNull}}"
+                    BackgroundColor="#E6F4EA" Stroke="#2E7D32" StrokeShape="RoundRectangle 10" Padding="12">
+                <Label Text="{Binding ResultMessage}" TextColor="#1B5E20" />
+            </Border>
+
+            <Label Text="Conta de destino" FontSize="12" TextColor="#6E6E6E" />
+            <Picker ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}" />
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                <Button Grid.Column="0" Text="Escolher arquivo" Command="{Binding PickFileCommand}"
+                        BackgroundColor="#0D47A1" TextColor="White" CornerRadius="12" />
+                <Label Grid.Column="1" Text="{Binding FileName}" FontSize="12" VerticalOptions="Center"
+                       LineBreakMode="MiddleTruncation" TextColor="{AppThemeBinding Light=#6E6E6E, Dark=#9AA4AF}" />
+            </Grid>
+
+            <Button Text="Analisar" Command="{Binding PreviewCommand}" IsEnabled="{Binding HasFile}"
+                    BackgroundColor="#1565C0" TextColor="White" CornerRadius="12" />
+
+            <Label Text="{Binding StatusMessage}" FontSize="12" IsVisible="{Binding StatusMessage, Converter={StaticResource IsNotNull}}"
+                   TextColor="{AppThemeBinding Light=#6E6E6E, Dark=#9AA4AF}" />
+            <Label Text="Formatos aceitos: CSV (data; descrição; valor) e OFX. A importação não duplica lançamentos já importados."
+                   FontSize="11" TextColor="#919191" />
+        </VerticalStackLayout>
+
+        <!-- Prévia -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Rows}" SelectionMode="None" Margin="8,0">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:ImportRow">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Padding="8,8"
+                          BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}">
+                        <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalOptions="Center" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                            <Label Text="{Binding Description}" FontSize="14" LineBreakMode="TailTruncation"
+                                   TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="{Binding DateLabel}" FontSize="11" TextColor="#919191" />
+                                <Border IsVisible="{Binding IsDuplicate}" BackgroundColor="#FFF3CD" Stroke="#F9A825"
+                                        StrokeShape="RoundRectangle 6" Padding="5,1">
+                                    <Label Text="já importado" FontSize="9" FontAttributes="Bold" TextColor="#8A6D00" />
+                                </Border>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Text="{Binding AmountLabel}" FontSize="14" FontAttributes="Bold"
+                               VerticalOptions="Center" TextColor="{Binding AmountColorHex, Converter={StaticResource HexColor}}" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Ação final -->
+        <VerticalStackLayout Grid.Row="2" Padding="16" IsVisible="{Binding HasPreview}">
+            <Button Text="Importar selecionados" Command="{Binding CommitCommand}"
+                    BackgroundColor="#2E7D32" TextColor="White" CornerRadius="12" />
+        </VerticalStackLayout>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                           Color="#0D47A1" VerticalOptions="Center" HorizontalOptions="Center" />
+    </Grid>
+</ContentPage>

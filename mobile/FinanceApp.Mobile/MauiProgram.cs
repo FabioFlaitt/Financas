@@ -54,6 +54,10 @@ public static class MauiProgram
         builder.Services.AddTransient<BudgetEditViewModel>();
         builder.Services.AddTransient<BudgetEditPage>();
 
+        // --- Importação de extratos ---
+        builder.Services.AddTransient<ImportViewModel>();
+        builder.Services.AddTransient<ImportPage>();
+
         // --- Lançamentos ---
         builder.Services.AddTransient<TransactionsViewModel>();
         builder.Services.AddTransient<TransactionsPage>();

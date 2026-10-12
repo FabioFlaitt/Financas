@@ -187,6 +187,14 @@ public class FinanceApiClient
     public Task<InvoiceListItem> PayInvoiceAsync(Guid invoiceId, object body, CancellationToken ct = default)
         => SendAsync<InvoiceListItem>(HttpMethod.Post, $"/api/invoices/{invoiceId}/pay", body, ct);
 
+    // ---- Importação de extratos ----
+
+    public Task<ImportPreview> PreviewImportAsync(object body, CancellationToken ct = default)
+        => SendAsync<ImportPreview>(HttpMethod.Post, "/api/imports/preview", body, ct);
+
+    public Task<ImportResult> CommitImportAsync(object body, CancellationToken ct = default)
+        => SendAsync<ImportResult>(HttpMethod.Post, "/api/imports/commit", body, ct);
+
     // ---- Viagens ----
 
     public Task<List<TripDto>> ListTripsAsync(CancellationToken ct = default)

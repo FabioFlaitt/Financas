@@ -34,5 +34,7 @@ public partial class SettingsPage : ContentPage
 
     private async void OnBudgetTapped(object? sender, EventArgs e) => await OpenAsync<BudgetPage>();
 
+    private async void OnImportTapped(object? sender, EventArgs e) => await OpenAsync<ImportPage>();
+
     private async void OnTripsTapped(object? sender, EventArgs e) => await OpenAsync<TripsPage>();
 }

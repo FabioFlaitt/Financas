@@ -1,7 +1,7 @@
 # Arquitetura e Decisões Técnicas — Meu Controle Financeiro
 
-> Documento vivo. Reflete o estado ao final da **Fase 4** (cartões, faturas e compras parceladas),
-> sobre a base das Fases 1–3 (arquitetura, CRUD completo, Viagens, orçamento, relatórios e gráficos).
+> Documento vivo. Reflete o estado ao final da **Fase 5** (importação de extratos CSV/OFX com conciliação
+> idempotente), sobre a base das Fases 1–4 (arquitetura, CRUD, Viagens, orçamento, relatórios, gráficos e cartões).
 
 ## 1. Objetivo
 
@@ -128,6 +128,9 @@ nas regras financeiras. Fornecedores a avaliar, requisitos, custos e limitaçõe
   fechamento, pagamento que reduz o caixa sem recontabilizar as compras) e **compras parceladas**
   (`/api/cards/{id}/installments`, uma parcela por fatura). No app: aba **Cartões** (lista, edição,
   faturas por cartão, detalhe da fatura com pagar/fechar, formulário de parcelamento). 50 testes no backend.
-- **Fase 5**: importação de extratos CSV/OFX com revisão e conciliação idempotente.
+- **Fase 5 (entregue)**: **importação de extratos CSV/OFX** (`StatementImportService`/`/api/imports`:
+  `preview` analisa o arquivo e marca duplicados; `commit` importa os itens selecionados). Conciliação
+  **idempotente** por `ExternalId` (FITID do OFX ou hash dos dados no CSV, prefixado pela conta) — reimportar
+  não duplica. No app: tela **Importar extrato** (escolher arquivo, revisar com seleção, importar). 55 testes.
 - **Fase 6**: Open Finance real e sincronização bancária.
 - **Fase 7**: notificações, reforço de segurança, mais testes e preparação para distribuição iOS.
