@@ -26,9 +26,32 @@ public class DashboardResult
     public decimal PreviousMonthExpense { get; set; }
     public decimal? ExpenseVsPreviousMonthPercent { get; set; }
     public decimal ProjectedEndOfMonthBalance { get; set; }
+    public int ExpenseCount { get; set; }
+    public decimal AverageExpense { get; set; }
     public List<DailyBalancePoint> DailyBalanceEvolution { get; set; } = new();
     public List<CategorySlice> ExpensesByCategory { get; set; } = new();
+    public List<PaymentMethodSlice> ExpensesByPaymentMethod { get; set; } = new();
     public List<TopExpenseItem> TopExpenses { get; set; } = new();
+}
+
+public class PaymentMethodSlice
+{
+    public string Method { get; set; } = string.Empty;
+    public string MethodLabel { get; set; } = string.Empty;
+    public string ColorHex { get; set; } = "#757575";
+    public decimal Amount { get; set; }
+    public decimal Percent { get; set; }
+
+    public string Icon => Method switch
+    {
+        "Cash" => "💵",
+        "Debit" => "💳",
+        "Credit" => "💳",
+        "Pix" => "⚡",
+        "Boleto" => "🧾",
+        "BankTransfer" => "🏦",
+        _ => "💰"
+    };
 }
 
 public class DailyBalancePoint

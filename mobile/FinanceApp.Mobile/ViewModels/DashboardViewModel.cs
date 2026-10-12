@@ -17,7 +17,13 @@ public partial class DashboardViewModel : ObservableObject
     {
         _api = api;
         _session = session;
+        var now = DateTime.Today;
+        _year = now.Year;
+        _month = now.Month;
     }
+
+    private int _year;
+    private int _month;
 
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private bool _isDemo;
@@ -31,7 +37,11 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty] private IDrawable? _balanceChart;
 
     public IReadOnlyList<CategorySlice> Categories => Dashboard?.ExpensesByCategory ?? new List<CategorySlice>();
+    public IReadOnlyList<PaymentMethodSlice> PaymentMethods => Dashboard?.ExpensesByPaymentMethod ?? new List<PaymentMethodSlice>();
     public IReadOnlyList<TopExpenseItem> TopExpenses => Dashboard?.TopExpenses ?? new List<TopExpenseItem>();
+    public bool HasPaymentMethods => PaymentMethods.Count > 0;
+    public string ExpenseCountLabel => (Dashboard?.ExpenseCount ?? 0).ToString();
+    public string AverageExpenseLabel => (Dashboard?.AverageExpense ?? 0m).ToString("C2", BrazilCulture.PtBr);
 
     [RelayCommand]
     public async Task LoadAsync()
@@ -59,7 +69,7 @@ public partial class DashboardViewModel : ObservableObject
             DashboardResult data;
             if (_session.IsAuthenticated)
             {
-                data = await _api.GetDashboardAsync();
+                data = await _api.GetDashboardAsync(_year, _month);
                 IsDemo = false;
             }
             else if (ApiConfig.FallbackToDemoData)
@@ -107,6 +117,26 @@ public partial class DashboardViewModel : ObservableObject
         BalanceChart = new LineChartDrawable(data.DailyBalanceEvolution, Color.FromArgb("#0D47A1"));
 
         OnPropertyChanged(nameof(Categories));
+        OnPropertyChanged(nameof(PaymentMethods));
+        OnPropertyChanged(nameof(HasPaymentMethods));
+        OnPropertyChanged(nameof(ExpenseCountLabel));
+        OnPropertyChanged(nameof(AverageExpenseLabel));
         OnPropertyChanged(nameof(TopExpenses));
+    }
+
+    [RelayCommand]
+    private async Task PreviousMonthAsync()
+    {
+        var d = new DateTime(_year, _month, 1).AddMonths(-1);
+        _year = d.Year; _month = d.Month;
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    private async Task NextMonthAsync()
+    {
+        var d = new DateTime(_year, _month, 1).AddMonths(1);
+        _year = d.Year; _month = d.Month;
+        await LoadAsync();
     }
 }

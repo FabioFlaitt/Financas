@@ -20,7 +20,7 @@
             <Setter Property="TextColor" Value="{AppThemeBinding Light=#6E6E6E, Dark=#9AA4AF}" />
         </Style>
         <Style x:Key="CardValue" TargetType="Label">
-            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontSize" Value="18" />
             <Setter Property="FontAttributes" Value="Bold" />
             <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
         </Style>
@@ -29,6 +29,14 @@
             <Setter Property="FontAttributes" Value="Bold" />
             <Setter Property="Margin" Value="4,8,4,4" />
             <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+        </Style>
+        <Style x:Key="NavArrow" TargetType="Button">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="WidthRequest" Value="40" />
+            <Setter Property="HeightRequest" Value="36" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="TextColor" Value="White" />
         </Style>
     </ContentPage.Resources>
 
@@ -41,7 +49,7 @@
                     <VerticalStackLayout>
                         <Label Text="{Binding Greeting}" FontSize="22" FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light=#0D47A1, Dark=#90CAF9}" />
-                        <Label Text="{Binding MonthLabel}" Style="{StaticResource CardLabel}" />
+                        <Label Text="Resumo do mês" Style="{StaticResource CardLabel}" />
                     </VerticalStackLayout>
                     <Border Grid.Column="1" IsVisible="{Binding IsDemo}"
                             BackgroundColor="#FFF3CD" Stroke="#F9A825" StrokeShape="RoundRectangle 8"
@@ -56,81 +64,115 @@
                     <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" />
                 </Border>
 
-                <!-- Saldo total em destaque -->
-                <Border Style="{StaticResource Card}" BackgroundColor="{AppThemeBinding Light=#0D47A1, Dark=#13294B}">
-                    <VerticalStackLayout Spacing="2">
-                        <Label Text="Saldo total das contas" FontSize="12" TextColor="#BBD4F5" />
-                        <Label Text="{Binding Dashboard.TotalBalance, Converter={StaticResource Currency}}"
-                               FontSize="30" FontAttributes="Bold" TextColor="White" />
-                        <HorizontalStackLayout Spacing="4">
-                            <Label Text="Projeção fim do mês:" FontSize="12" TextColor="#BBD4F5" />
-                            <Label Text="{Binding Dashboard.ProjectedEndOfMonthBalance, Converter={StaticResource Currency}}"
-                                   FontSize="12" FontAttributes="Bold" TextColor="#BBD4F5" />
-                        </HorizontalStackLayout>
+                <!-- Hero: saldo total + navegador de mês -->
+                <Border Style="{StaticResource Card}" BackgroundColor="{AppThemeBinding Light=#0D47A1, Dark=#13294B}"
+                        Stroke="Transparent" Padding="18">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center">
+                            <Button Grid.Column="0" Text="‹" Style="{StaticResource NavArrow}" Command="{Binding PreviousMonthCommand}" />
+                            <Label Grid.Column="1" Text="{Binding MonthLabel}" FontSize="15" FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center" VerticalOptions="Center" TextColor="#BBD4F5" />
+                            <Button Grid.Column="2" Text="›" Style="{StaticResource NavArrow}" Command="{Binding NextMonthCommand}" />
+                        </Grid>
+                        <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                            <Label Text="Saldo total das contas" FontSize="12" TextColor="#BBD4F5" HorizontalOptions="Center" />
+                            <Label Text="{Binding Dashboard.TotalBalance, Converter={StaticResource Currency}}"
+                                   FontSize="34" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" />
+                            <HorizontalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Label Text="Projeção fim do mês:" FontSize="12" TextColor="#BBD4F5" />
+                                <Label Text="{Binding Dashboard.ProjectedEndOfMonthBalance, Converter={StaticResource Currency}}"
+                                       FontSize="12" FontAttributes="Bold" TextColor="White" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- KPIs principais -->
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
-                    <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource Card}">
+                <!-- KPIs: receitas / despesas / resultado -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <Border Grid.Column="0" Style="{StaticResource Card}" Padding="12">
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="Receitas do mês" Style="{StaticResource CardLabel}" />
+                            <Label Text="Receitas" Style="{StaticResource CardLabel}" />
                             <Label Text="{Binding Dashboard.MonthIncome, Converter={StaticResource Currency}}"
-                                   Style="{StaticResource CardValue}" TextColor="#2E7D32" />
+                                   FontSize="14" FontAttributes="Bold" TextColor="#2E7D32" />
                         </VerticalStackLayout>
                     </Border>
-                    <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource Card}">
+                    <Border Grid.Column="1" Style="{StaticResource Card}" Padding="12">
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="Despesas do mês" Style="{StaticResource CardLabel}" />
+                            <Label Text="Despesas" Style="{StaticResource CardLabel}" />
                             <Label Text="{Binding Dashboard.MonthExpense, Converter={StaticResource Currency}}"
-                                   Style="{StaticResource CardValue}" TextColor="#C62828" />
+                                   FontSize="14" FontAttributes="Bold" TextColor="#C62828" />
                         </VerticalStackLayout>
                     </Border>
-
-                    <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource Card}">
+                    <Border Grid.Column="2" Style="{StaticResource Card}" Padding="12">
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="Resultado do mês" Style="{StaticResource CardLabel}" />
-                            <Label Text="{Binding Dashboard.MonthResult, Converter={StaticResource SignedCurrency}}"
-                                   Style="{StaticResource CardValue}"
+                            <Label Text="Resultado" Style="{StaticResource CardLabel}" />
+                            <Label Text="{Binding Dashboard.MonthResult, Converter={StaticResource Currency}}"
+                                   FontSize="14" FontAttributes="Bold"
                                    TextColor="{Binding Dashboard.MonthResult, Converter={StaticResource AmountColor}}" />
                         </VerticalStackLayout>
                     </Border>
-                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Card}">
+                </Grid>
+
+                <!-- Formas de pagamento -->
+                <Label Text="Despesas por forma de pagamento" Style="{StaticResource SectionTitle}"
+                       IsVisible="{Binding HasPaymentMethods}" />
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" IsVisible="{Binding HasPaymentMethods}">
+                    <HorizontalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding PaymentMethods}" Padding="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:PaymentMethodSlice">
+                                <Border Style="{StaticResource Card}" Padding="12" WidthRequest="124">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Border WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 10" Stroke="Transparent"
+                                                BackgroundColor="{Binding ColorHex, Converter={StaticResource HexColor}}">
+                                            <Label Text="{Binding Icon}" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                        <Label Text="{Binding MethodLabel}" Style="{StaticResource CardLabel}" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding Amount, Converter={StaticResource Currency}}" Style="{StaticResource CardValue}" FontSize="15" />
+                                        <Label Text="{Binding Percent, Converter={StaticResource Percent}}" FontSize="11"
+                                               TextColor="{Binding ColorHex, Converter={StaticResource HexColor}}" FontAttributes="Bold" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <!-- Lançamentos e ticket médio -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Border Grid.Column="0" Style="{StaticResource Card}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="🧾" FontSize="22" VerticalOptions="Center" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Lançamentos" Style="{StaticResource CardLabel}" />
+                                <Label Text="{Binding ExpenseCountLabel}" Style="{StaticResource CardValue}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Column="1" Style="{StaticResource Card}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="🎯" FontSize="22" VerticalOptions="Center" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Ticket médio" Style="{StaticResource CardLabel}" />
+                                <Label Text="{Binding AverageExpenseLabel}" Style="{StaticResource CardValue}" FontSize="15" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Indicadores complementares -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Border Grid.Column="0" Style="{StaticResource Card}" Padding="12">
                         <VerticalStackLayout Spacing="2">
                             <Label Text="Faturas em aberto" Style="{StaticResource CardLabel}" />
                             <Label Text="{Binding Dashboard.OpenInvoicesTotal, Converter={StaticResource Currency}}"
-                                   Style="{StaticResource CardValue}" TextColor="#6A1B9A" />
+                                   Style="{StaticResource CardValue}" FontSize="15" TextColor="#6A1B9A" />
                         </VerticalStackLayout>
                     </Border>
-
-                    <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource Card}">
+                    <Border Grid.Column="1" Style="{StaticResource Card}" Padding="12">
                         <VerticalStackLayout Spacing="2">
                             <Label Text="Renda comprometida" Style="{StaticResource CardLabel}" />
                             <Label Text="{Binding Dashboard.CommittedIncomePercent, Converter={StaticResource Percent}}"
-                                   Style="{StaticResource CardValue}" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource Card}">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="Despesas vs. mês anterior" Style="{StaticResource CardLabel}" />
-                            <Label Text="{Binding Dashboard.ExpenseVsPreviousMonthPercent, Converter={StaticResource Percent}}"
-                                   Style="{StaticResource CardValue}"
-                                   TextColor="{Binding Dashboard.ExpenseVsPreviousMonthPercent, Converter={StaticResource AmountColor}}" />
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource Card}">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="Despesas realizadas" Style="{StaticResource CardLabel}" />
-                            <Label Text="{Binding Dashboard.RealizedExpenses, Converter={StaticResource Currency}}"
-                                   Style="{StaticResource CardValue}" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource Card}">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="Despesas previstas" Style="{StaticResource CardLabel}" />
-                            <Label Text="{Binding Dashboard.ForecastExpenses, Converter={StaticResource Currency}}"
-                                   Style="{StaticResource CardValue}" />
+                                   Style="{StaticResource CardValue}" FontSize="15" />
                         </VerticalStackLayout>
                     </Border>
                 </Grid>

@@ -1,4 +1,5 @@
 using FinanceApp.Application.Common.Interfaces;
+using FinanceApp.Domain.Common;
 using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -152,6 +153,25 @@ public class DashboardService : IDashboardService
             .OrderByDescending(s => s.Amount)
             .ToList();
 
+        // --- Despesas por forma de pagamento (tiles coloridos) ---
+        var expenseCount = monthExpenses.Count;
+        var averageExpense = expenseCount > 0 ? Math.Round(monthExpense / expenseCount, 2) : 0m;
+
+        var byPaymentMethod = monthExpenses
+            .GroupBy(t => t.PaymentMethod)
+            .Select(g =>
+            {
+                var amount = g.Sum(t => t.Amount);
+                return new PaymentMethodSlice(
+                    g.Key?.ToString() ?? "Unknown",
+                    g.Key?.GetDescription() ?? "Não informado",
+                    PaymentMethodColor(g.Key),
+                    Math.Round(amount, 2),
+                    monthExpense > 0 ? Math.Round(amount / monthExpense * 100m, 1) : 0m);
+            })
+            .OrderByDescending(s => s.Amount)
+            .ToList();
+
         // --- Cinco maiores despesas ---
         var topExpenses = monthExpenses
             .OrderByDescending(t => t.Amount)
@@ -177,11 +197,25 @@ public class DashboardService : IDashboardService
             PreviousMonthExpense = Math.Round(previousMonthExpense, 2),
             ExpenseVsPreviousMonthPercent = expenseVsPrev,
             ProjectedEndOfMonthBalance = Math.Round(projectedEndOfMonth, 2),
+            ExpenseCount = expenseCount,
+            AverageExpense = averageExpense,
             DailyBalanceEvolution = evolution,
             ExpensesByCategory = byCategory,
+            ExpensesByPaymentMethod = byPaymentMethod,
             TopExpenses = topExpenses
         };
     }
+
+    private static string PaymentMethodColor(PaymentMethod? method) => method switch
+    {
+        PaymentMethod.Cash => "#2E7D32",
+        PaymentMethod.Debit => "#1565C0",
+        PaymentMethod.Credit => "#6A1B9A",
+        PaymentMethod.Pix => "#00838F",
+        PaymentMethod.Boleto => "#EF6C00",
+        PaymentMethod.BankTransfer => "#283593",
+        _ => "#757575"
+    };
 
     /// <summary>
     /// Efeito de um lançamento sobre o saldo de CAIXA (não de relatório).

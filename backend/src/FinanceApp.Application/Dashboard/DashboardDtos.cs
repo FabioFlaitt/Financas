@@ -42,13 +42,22 @@ public record DashboardResult
     /// <summary>Saldo projetado até o fim do mês (inclui previstos/pendentes).</summary>
     public decimal ProjectedEndOfMonthBalance { get; init; }
 
+    /// <summary>Quantidade de lançamentos de despesa no mês (para análises e ticket médio).</summary>
+    public int ExpenseCount { get; init; }
+
+    /// <summary>Ticket médio das despesas do mês (despesa total ÷ nº de lançamentos).</summary>
+    public decimal AverageExpense { get; init; }
+
     public IReadOnlyList<DailyBalancePoint> DailyBalanceEvolution { get; init; } = Array.Empty<DailyBalancePoint>();
     public IReadOnlyList<CategorySlice> ExpensesByCategory { get; init; } = Array.Empty<CategorySlice>();
+    public IReadOnlyList<PaymentMethodSlice> ExpensesByPaymentMethod { get; init; } = Array.Empty<PaymentMethodSlice>();
     public IReadOnlyList<TopExpenseItem> TopExpenses { get; init; } = Array.Empty<TopExpenseItem>();
 }
 
 public record DailyBalancePoint(DateOnly Date, decimal Balance);
 
 public record CategorySlice(Guid? CategoryId, string CategoryName, string ColorHex, decimal Amount, decimal Percent);
+
+public record PaymentMethodSlice(string Method, string MethodLabel, string ColorHex, decimal Amount, decimal Percent);
 
 public record TopExpenseItem(Guid TransactionId, string Description, string? CategoryName, decimal Amount, DateOnly Date);

@@ -133,4 +133,15 @@ public class DashboardServiceTests
         result.TopExpenses[0].Amount.Should().Be(1500m);
         result.TopExpenses.Should().BeInDescendingOrder(t => t.Amount);
     }
+
+    [Fact]
+    public async Task Computes_expense_count_average_and_payment_breakdown()
+    {
+        var (service, _) = Build();
+        var result = await service.GetAsync(JuneQuery);
+
+        result.ExpenseCount.Should().Be(4);                 // aluguel, 2x alimentação + cartão, previsto
+        result.AverageExpense.Should().Be(525m);            // 2100 / 4
+        result.ExpensesByPaymentMethod.Sum(p => p.Amount).Should().Be(2100m);
+    }
 }

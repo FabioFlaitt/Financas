@@ -40,6 +40,15 @@ public static class DemoDashboardData
             PreviousMonthExpense = 3600m,
             ExpenseVsPreviousMonthPercent = 7.5m,
             ProjectedEndOfMonthBalance = 11290m,
+            ExpenseCount = 24,
+            AverageExpense = 161.25m,
+            ExpensesByPaymentMethod = new List<PaymentMethodSlice>
+            {
+                new() { Method = "Credit", MethodLabel = "Crédito", ColorHex = "#6A1B9A", Amount = 1800m, Percent = 46.5m },
+                new() { Method = "Debit", MethodLabel = "Débito", ColorHex = "#1565C0", Amount = 1100m, Percent = 28.4m },
+                new() { Method = "Pix", MethodLabel = "Pix", ColorHex = "#00838F", Amount = 620m, Percent = 16.0m },
+                new() { Method = "Cash", MethodLabel = "Dinheiro", ColorHex = "#2E7D32", Amount = 350m, Percent = 9.0m },
+            },
             DailyBalanceEvolution = evolution,
             ExpensesByCategory = new List<CategorySlice>
             {
