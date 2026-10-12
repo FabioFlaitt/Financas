@@ -1,3 +1,4 @@
+using FinanceApp.Application.Cards;
 using FinanceApp.Application.Common.Exceptions;
 using FinanceApp.Application.Transactions;
 using FinanceApp.Domain.Entities;
@@ -22,7 +23,9 @@ public class TransactionServiceTests
         db.Categories.Add(category);
         db.SaveChanges();
 
-        var service = new TransactionService(db, new FakeCurrentUser(UserId));
+        var currentUser = new FakeCurrentUser(UserId);
+        var invoices = new InvoiceService(db, currentUser, new FakeClock(new DateOnly(2026, 6, 15)));
+        var service = new TransactionService(db, currentUser, invoices);
         return (service, db, account.Id, dest.Id, category.Id);
     }
 

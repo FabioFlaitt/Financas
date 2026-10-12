@@ -57,12 +57,3 @@ public abstract class FeaturePlaceholderPage : ContentPage
         };
     }
 }
-
-public class CardsPage : FeaturePlaceholderPage
-{
-    public CardsPage() : base(
-        "Cartões", "💳", "Cartões e faturas",
-        "Limites, fechamento e vencimento, compras parceladas, histórico e projeção de faturas, comparação entre cartões.",
-        "Previsto para a Fase 4")
-    { }
-}

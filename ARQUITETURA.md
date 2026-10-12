@@ -1,7 +1,7 @@
 # Arquitetura e Decisões Técnicas — Meu Controle Financeiro
 
-> Documento vivo. Reflete o estado ao final da **Fase 3** (orçamento mensal, relatórios e a aba de
-> gráficos no app), sobre a base das Fases 1–2 (arquitetura, CRUD completo e o módulo de Viagens).
+> Documento vivo. Reflete o estado ao final da **Fase 4** (cartões, faturas e compras parceladas),
+> sobre a base das Fases 1–3 (arquitetura, CRUD completo, Viagens, orçamento, relatórios e gráficos).
 
 ## 1. Objetivo
 
@@ -123,7 +123,11 @@ nas regras financeiras. Fornecedores a avaliar, requisitos, custos e limitaçõe
   `ReportService`/`/api/reports/summary`: série mensal de receitas×despesas, despesas por categoria e
   fixas×variáveis) e a **aba Gráficos** no app. Filtros de lançamento (período, categoria, conta, tipo,
   busca) já existiam na API e por mês/busca no app. 43 testes no backend.
-- **Fase 4**: cartões, faturas e compras parceladas (telas + regras de fechamento/pagamento).
+- **Fase 4 (entregue)**: **cartões** (API `CardService`/`/api/cards` com fatura atual e limite disponível),
+  **faturas** (`InvoiceService`/`/api/invoices`: alocação de compras ao ciclo pela regra de fechamento,
+  fechamento, pagamento que reduz o caixa sem recontabilizar as compras) e **compras parceladas**
+  (`/api/cards/{id}/installments`, uma parcela por fatura). No app: aba **Cartões** (lista, edição,
+  faturas por cartão, detalhe da fatura com pagar/fechar, formulário de parcelamento). 50 testes no backend.
 - **Fase 5**: importação de extratos CSV/OFX com revisão e conciliação idempotente.
 - **Fase 6**: Open Finance real e sincronização bancária.
 - **Fase 7**: notificações, reforço de segurança, mais testes e preparação para distribuição iOS.

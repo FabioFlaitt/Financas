@@ -123,3 +123,62 @@ public class BudgetItem
     /// <summary>Cor da barra conforme o consumo: vermelho (estourou), âmbar (alerta) ou verde.</summary>
     public string BarColorHex => IsOverLimit ? "#C62828" : IsAlert ? "#F9A825" : "#2E7D32";
 }
+
+// ---- Cartões e faturas (Fase 4) ----
+
+public class CardDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Nickname { get; set; }
+    public string? Brand { get; set; }
+    public decimal? CreditLimit { get; set; }
+    public int ClosingDay { get; set; }
+    public int DueDay { get; set; }
+    public string ColorHex { get; set; } = "#6A1B9A";
+    public string Icon { get; set; } = "credit-card";
+    public Guid? DefaultPaymentAccountId { get; set; }
+    public decimal CurrentInvoiceTotal { get; set; }
+    public decimal OpenTotal { get; set; }
+    public decimal? AvailableLimit { get; set; }
+    public decimal? UsedLimitPercent { get; set; }
+
+    public double UsedFraction => CreditLimit is > 0 ? Math.Min(1.0, (double)(OpenTotal / CreditLimit.Value)) : 0;
+    public bool HasLimit => CreditLimit is > 0;
+}
+
+public class InvoiceListItem
+{
+    public Guid Id { get; set; }
+    public Guid CreditCardId { get; set; }
+    public DateOnly ReferenceMonth { get; set; }
+    public DateOnly ClosingDate { get; set; }
+    public DateOnly DueDate { get; set; }
+    public decimal TotalAmount { get; set; }
+    public decimal PaidAmount { get; set; }
+    public decimal OutstandingAmount { get; set; }
+    public string StatusLabel { get; set; } = string.Empty;
+    public bool IsOverdue { get; set; }
+
+    public string StatusColorHex => IsOverdue ? "#C62828"
+        : StatusLabel == "Paga" ? "#2E7D32"
+        : StatusLabel == "Fechada" ? "#F9A825"
+        : "#1565C0";
+}
+
+public class InvoiceDetail : InvoiceListItem
+{
+    public string CardName { get; set; } = string.Empty;
+    public List<InvoiceTransaction> Transactions { get; set; } = new();
+}
+
+public class InvoiceTransaction
+{
+    public Guid Id { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public DateOnly TransactionDate { get; set; }
+    public string? CategoryName { get; set; }
+    public string? CategoryColorHex { get; set; }
+    public bool IsInstallment { get; set; }
+}

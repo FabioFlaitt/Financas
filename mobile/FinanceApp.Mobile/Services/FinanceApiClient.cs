@@ -158,6 +158,35 @@ public class FinanceApiClient
     public Task DeleteBudgetAsync(Guid id, CancellationToken ct = default)
         => SendNoContentAsync(HttpMethod.Delete, $"/api/budgets/{id}", null, ct);
 
+    // ---- Cartões e faturas ----
+
+    public Task<List<CardDto>> ListCardsAsync(CancellationToken ct = default)
+        => GetAsync<List<CardDto>>("/api/cards", ct);
+
+    public Task<CardDto> CreateCardAsync(object body, CancellationToken ct = default)
+        => SendAsync<CardDto>(HttpMethod.Post, "/api/cards", body, ct);
+
+    public Task<CardDto> UpdateCardAsync(Guid id, object body, CancellationToken ct = default)
+        => SendAsync<CardDto>(HttpMethod.Put, $"/api/cards/{id}", body, ct);
+
+    public Task DeleteCardAsync(Guid id, CancellationToken ct = default)
+        => SendNoContentAsync(HttpMethod.Delete, $"/api/cards/{id}", null, ct);
+
+    public Task<List<InvoiceListItem>> ListCardInvoicesAsync(Guid cardId, CancellationToken ct = default)
+        => GetAsync<List<InvoiceListItem>>($"/api/cards/{cardId}/invoices", ct);
+
+    public Task AddInstallmentAsync(Guid cardId, object body, CancellationToken ct = default)
+        => SendNoContentAsync(HttpMethod.Post, $"/api/cards/{cardId}/installments", body, ct);
+
+    public Task<InvoiceDetail> GetInvoiceAsync(Guid invoiceId, CancellationToken ct = default)
+        => GetAsync<InvoiceDetail>($"/api/invoices/{invoiceId}", ct);
+
+    public Task<InvoiceListItem> CloseInvoiceAsync(Guid invoiceId, CancellationToken ct = default)
+        => SendAsync<InvoiceListItem>(HttpMethod.Post, $"/api/invoices/{invoiceId}/close", new { }, ct);
+
+    public Task<InvoiceListItem> PayInvoiceAsync(Guid invoiceId, object body, CancellationToken ct = default)
+        => SendAsync<InvoiceListItem>(HttpMethod.Post, $"/api/invoices/{invoiceId}/pay", body, ct);
+
     // ---- Viagens ----
 
     public Task<List<TripDto>> ListTripsAsync(CancellationToken ct = default)

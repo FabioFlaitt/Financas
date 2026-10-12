@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             x:Class="FinanceApp.Mobile.Views.CardEditPage"
+             x:DataType="vm:CardEditViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+            <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}"
+                    BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 10" Padding="12">
+                <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" />
+            </Border>
+
+            <Label Text="Nome" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding Name}" Placeholder="Ex.: Nubank" />
+
+            <Label Text="Bandeira (opcional)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding Brand}" Placeholder="Ex.: Visa" />
+
+            <Label Text="Limite (R$, opcional)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding LimitText}" Keyboard="Numeric" Placeholder="Ex.: 3.000,00" />
+
+            <Label Text="{Binding ClosingDayLabel}" FontSize="12" TextColor="#6E6E6E" />
+            <Stepper Minimum="1" Maximum="31" Increment="1" Value="{Binding ClosingDay}" HorizontalOptions="Start" />
+
+            <Label Text="{Binding DueDayLabel}" FontSize="12" TextColor="#6E6E6E" />
+            <Stepper Minimum="1" Maximum="31" Increment="1" Value="{Binding DueDay}" HorizontalOptions="Start" />
+
+            <Label Text="Conta para pagamento" FontSize="12" TextColor="#6E6E6E" />
+            <Picker ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}" />
+
+            <Label Text="Cor" FontSize="12" TextColor="#6E6E6E" />
+            <CollectionView ItemsSource="{Binding Palette}" HeightRequest="48">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Border WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 18"
+                                BackgroundColor="{Binding Converter={StaticResource HexColor}}" Stroke="#FFFFFF" StrokeThickness="2">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnColorTapped" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Button Text="Salvar" Command="{Binding SaveCommand}" BackgroundColor="#0D47A1" TextColor="White" CornerRadius="12" Margin="0,8,0,0" />
+            <Button Text="Excluir" Command="{Binding DeleteCommand}" IsVisible="{Binding IsEditing}"
+                    BackgroundColor="Transparent" TextColor="#C62828" BorderColor="#C62828" BorderWidth="1" CornerRadius="12" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#0D47A1" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

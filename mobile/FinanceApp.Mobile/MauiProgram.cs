@@ -33,6 +33,18 @@ public static class MauiProgram
         builder.Services.AddTransient<ChartsViewModel>();
         builder.Services.AddTransient<ChartsPage>();
 
+        // --- Cartões e faturas (aba) ---
+        builder.Services.AddTransient<CardsViewModel>();
+        builder.Services.AddTransient<CardsPage>();
+        builder.Services.AddTransient<CardEditViewModel>();
+        builder.Services.AddTransient<CardEditPage>();
+        builder.Services.AddTransient<CardInvoicesViewModel>();
+        builder.Services.AddTransient<CardInvoicesPage>();
+        builder.Services.AddTransient<InvoiceDetailViewModel>();
+        builder.Services.AddTransient<InvoiceDetailPage>();
+        builder.Services.AddTransient<InstallmentEditViewModel>();
+        builder.Services.AddTransient<InstallmentEditPage>();
+
         // --- Configurações (aba hub) ---
         builder.Services.AddTransient<SettingsPage>();
 

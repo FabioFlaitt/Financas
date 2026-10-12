@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             x:Class="FinanceApp.Mobile.Views.InstallmentEditPage"
+             x:DataType="vm:InstallmentEditViewModel"
+             Title="Compra parcelada"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+            <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}"
+                    BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 10" Padding="12">
+                <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" />
+            </Border>
+
+            <Label Text="{Binding CardName, StringFormat='Cartão: {0}'}" FontSize="13"
+                   TextColor="{AppThemeBinding Light=#0D47A1, Dark=#90CAF9}" FontAttributes="Bold" />
+
+            <Label Text="Descrição" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding Description}" Placeholder="Ex.: Notebook" />
+
+            <Label Text="Valor total (R$)" FontSize="12" TextColor="#6E6E6E" />
+            <Entry Text="{Binding TotalText}" Keyboard="Numeric" Placeholder="Ex.: 3.000,00" />
+
+            <Label Text="{Binding InstallmentsLabel, StringFormat='Parcelas: {0}'}" FontSize="12" TextColor="#6E6E6E" />
+            <Stepper Minimum="1" Maximum="48" Increment="1" Value="{Binding Installments}" HorizontalOptions="Start" />
+            <Label Text="{Binding PerInstallmentLabel}" FontSize="12" TextColor="#2E7D32" />
+
+            <Label Text="Categoria" FontSize="12" TextColor="#6E6E6E" />
+            <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" />
+
+            <Label Text="Data da compra" FontSize="12" TextColor="#6E6E6E" />
+            <DatePicker Date="{Binding PurchaseDate}" Format="dd/MM/yyyy" />
+
+            <Button Text="Salvar" Command="{Binding SaveCommand}" BackgroundColor="#0D47A1" TextColor="White" CornerRadius="12" Margin="0,8,0,0" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#0D47A1" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

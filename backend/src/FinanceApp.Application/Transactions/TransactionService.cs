@@ -1,3 +1,4 @@
+using FinanceApp.Application.Cards;
 using FinanceApp.Application.Common.Exceptions;
 using FinanceApp.Application.Common.Interfaces;
 using FinanceApp.Application.Common.Models;
@@ -22,12 +23,17 @@ public class TransactionService : ITransactionService
 {
     private readonly IApplicationDbContext _db;
     private readonly ICurrentUser _currentUser;
+    private readonly IInvoiceService _invoices;
 
-    public TransactionService(IApplicationDbContext db, ICurrentUser currentUser)
+    public TransactionService(IApplicationDbContext db, ICurrentUser currentUser, IInvoiceService invoices)
     {
         _db = db;
         _currentUser = currentUser;
+        _invoices = invoices;
     }
+
+    private static bool IsCardPurchase(TransactionType type, Guid? creditCardId)
+        => creditCardId.HasValue && type == TransactionType.Expense;
 
     private Guid UserId => _currentUser.UserId ?? throw new InvalidOperationException("Usuário não autenticado.");
 
@@ -113,8 +119,16 @@ public class TransactionService : ITransactionService
             ExcludeFromReports = request.Type is TransactionType.Transfer or TransactionType.CreditCardPayment
         };
 
+        // Compra no cartão: aloca na fatura do ciclo correspondente.
+        if (IsCardPurchase(tx.Type, tx.CreditCardId))
+            tx.InvoiceId = await _invoices.EnsureInvoiceIdAsync(tx.CreditCardId!.Value, tx.TransactionDate, ct);
+
         _db.Transactions.Add(tx);
         await _db.SaveChangesAsync(ct);
+
+        if (tx.InvoiceId is Guid invoiceId)
+            await _invoices.RecalculateAsync(invoiceId, ct);
+
         return await GetByIdAsync(tx.Id, ct);
     }
 
@@ -124,6 +138,8 @@ public class TransactionService : ITransactionService
             ?? throw NotFoundException.For("Lançamento", request.Id);
 
         await ValidateReferencesAsync(request, ct);
+
+        var oldInvoiceId = tx.InvoiceId;
 
         tx.Description = request.Description.Trim();
         tx.Amount = Math.Abs(request.Amount);
@@ -143,7 +159,16 @@ public class TransactionService : ITransactionService
         tx.ExcludeFromReports = request.Type is TransactionType.Transfer or TransactionType.CreditCardPayment;
         tx.UpdatedAtUtc = DateTime.UtcNow;
 
+        // Realoca a fatura conforme o novo cartão/data (ou desvincula se deixou de ser compra no cartão).
+        tx.InvoiceId = IsCardPurchase(tx.Type, tx.CreditCardId)
+            ? await _invoices.EnsureInvoiceIdAsync(tx.CreditCardId!.Value, tx.TransactionDate, ct)
+            : null;
+
         await _db.SaveChangesAsync(ct);
+
+        foreach (var invId in new[] { oldInvoiceId, tx.InvoiceId }.Where(x => x.HasValue).Select(x => x!.Value).Distinct())
+            await _invoices.RecalculateAsync(invId, ct);
+
         return await GetByIdAsync(tx.Id, ct);
     }
 
@@ -173,8 +198,16 @@ public class TransactionService : ITransactionService
             Origin = TransactionOrigin.Manual,
             ExcludeFromReports = src.ExcludeFromReports
         };
+
+        if (IsCardPurchase(copy.Type, copy.CreditCardId))
+            copy.InvoiceId = await _invoices.EnsureInvoiceIdAsync(copy.CreditCardId!.Value, copy.TransactionDate, ct);
+
         _db.Transactions.Add(copy);
         await _db.SaveChangesAsync(ct);
+
+        if (copy.InvoiceId is Guid invoiceId)
+            await _invoices.RecalculateAsync(invoiceId, ct);
+
         return await GetByIdAsync(copy.Id, ct);
     }
 
@@ -182,8 +215,12 @@ public class TransactionService : ITransactionService
     {
         var tx = await _db.Transactions.FirstOrDefaultAsync(t => t.Id == id && t.UserId == UserId, ct)
             ?? throw NotFoundException.For("Lançamento", id);
+        var invoiceId = tx.InvoiceId;
         _db.Transactions.Remove(tx);
         await _db.SaveChangesAsync(ct);
+
+        if (invoiceId is Guid invId)
+            await _invoices.RecalculateAsync(invId, ct);
     }
 
     private async Task ValidateReferencesAsync(CreateTransactionRequest r, CancellationToken ct)

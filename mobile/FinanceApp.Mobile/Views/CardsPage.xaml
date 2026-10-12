@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:models="clr-namespace:FinanceApp.Mobile.Models"
+             x:Class="FinanceApp.Mobile.Views.CardsPage"
+             x:DataType="vm:CardsViewModel"
+             Title="Cartões"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Novo" Clicked="OnAddClicked" />
+    </ContentPage.ToolbarItems>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="30" VerticalOptions="Center" Spacing="6">
+                    <Label Text="💳" FontSize="40" HorizontalOptions="Center" />
+                    <Label Text="Nenhum cartão cadastrado" HorizontalOptions="Center" TextColor="#6E6E6E" />
+                    <Label Text="Toque em “Novo” para adicionar um cartão." FontSize="12" HorizontalOptions="Center" TextColor="#919191" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:CardDto">
+                    <Border Margin="16,8" Padding="16" StrokeShape="RoundRectangle 16"
+                            BackgroundColor="{Binding ColorHex, Converter={StaticResource HexColor}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCardTapped" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Grid.Column="0" Spacing="1">
+                                    <Label Text="{Binding Name}" FontSize="17" FontAttributes="Bold" TextColor="White" />
+                                    <Label Text="{Binding Brand}" FontSize="12" TextColor="#E6E6E6" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1" Text="💳" FontSize="22" VerticalOptions="Start" />
+                            </Grid>
+
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Fatura atual" FontSize="11" TextColor="#E6E6E6" />
+                                <Label Text="{Binding CurrentInvoiceTotal, Converter={StaticResource Currency}}"
+                                       FontSize="22" FontAttributes="Bold" TextColor="White" />
+                            </VerticalStackLayout>
+
+                            <ProgressBar Progress="{Binding UsedFraction}" ProgressColor="White" IsVisible="{Binding HasLimit}" />
+                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasLimit}">
+                                <Label Grid.Column="0" Text="{Binding AvailableLimit, Converter={StaticResource Currency}, StringFormat='Disponível: {0}'}"
+                                       FontSize="11" TextColor="#E6E6E6" />
+                                <Label Grid.Column="1" Text="{Binding ClosingDay, StringFormat='Fecha dia {0}'}" FontSize="11" TextColor="#E6E6E6" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
+</ContentPage>
