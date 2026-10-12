@@ -208,3 +208,31 @@ public class ImportResult
     public int Imported { get; set; }
     public int SkippedDuplicates { get; set; }
 }
+
+// ---- Notificações e alertas (Fase 7) ----
+
+public class AlertItem
+{
+    public string Type { get; set; } = string.Empty;
+    public string TypeLabel { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Detail { get; set; } = string.Empty;
+    public string Severity { get; set; } = "info";
+    public DateOnly? Date { get; set; }
+
+    public string SeverityColorHex => Severity switch
+    {
+        "critical" => "#C62828",
+        "warning" => "#F9A825",
+        _ => "#1565C0"
+    };
+}
+
+public class NotificationPreferenceItem
+{
+    public string Type { get; set; } = string.Empty;
+    public string TypeLabel { get; set; } = string.Empty;
+    public bool Enabled { get; set; }
+    public bool HideSensitiveOnLockScreen { get; set; }
+    public string? PreferredTime { get; set; }
+}

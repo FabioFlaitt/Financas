@@ -1,11 +1,13 @@
 using FinanceApp.Application.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FinanceApp.Api.Controllers;
 
 [ApiController]
 [AllowAnonymous]
+[EnableRateLimiting("auth")]
 [Route("api/[controller]")]
 [Produces("application/json")]
 public class AuthController : ControllerBase

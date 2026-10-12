@@ -187,6 +187,17 @@ public class FinanceApiClient
     public Task<InvoiceListItem> PayInvoiceAsync(Guid invoiceId, object body, CancellationToken ct = default)
         => SendAsync<InvoiceListItem>(HttpMethod.Post, $"/api/invoices/{invoiceId}/pay", body, ct);
 
+    // ---- Notificações e alertas ----
+
+    public Task<List<AlertItem>> GetAlertsAsync(CancellationToken ct = default)
+        => GetAsync<List<AlertItem>>("/api/notifications/alerts", ct);
+
+    public Task<List<NotificationPreferenceItem>> GetNotificationPreferencesAsync(CancellationToken ct = default)
+        => GetAsync<List<NotificationPreferenceItem>>("/api/notifications/preferences", ct);
+
+    public Task<NotificationPreferenceItem> UpdateNotificationPreferenceAsync(string type, object body, CancellationToken ct = default)
+        => SendAsync<NotificationPreferenceItem>(HttpMethod.Put, $"/api/notifications/preferences/{type}", body, ct);
+
     // ---- Importação de extratos ----
 
     public Task<ImportPreview> PreviewImportAsync(object body, CancellationToken ct = default)

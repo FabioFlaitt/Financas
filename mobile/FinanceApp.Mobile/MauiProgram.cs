@@ -58,6 +58,10 @@ public static class MauiProgram
         builder.Services.AddTransient<ImportViewModel>();
         builder.Services.AddTransient<ImportPage>();
 
+        // --- Alertas e notificações ---
+        builder.Services.AddTransient<NotificationsViewModel>();
+        builder.Services.AddTransient<NotificationsPage>();
+
         // --- Lançamentos ---
         builder.Services.AddTransient<TransactionsViewModel>();
         builder.Services.AddTransient<TransactionsPage>();

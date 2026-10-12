@@ -36,5 +36,7 @@ public partial class SettingsPage : ContentPage
 
     private async void OnImportTapped(object? sender, EventArgs e) => await OpenAsync<ImportPage>();
 
+    private async void OnNotificationsTapped(object? sender, EventArgs e) => await OpenAsync<NotificationsPage>();
+
     private async void OnTripsTapped(object? sender, EventArgs e) => await OpenAsync<TripsPage>();
 }

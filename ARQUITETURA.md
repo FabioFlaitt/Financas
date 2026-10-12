@@ -1,7 +1,8 @@
 # Arquitetura e Decisões Técnicas — Meu Controle Financeiro
 
-> Documento vivo. Reflete o estado ao final da **Fase 5** (importação de extratos CSV/OFX com conciliação
-> idempotente), sobre a base das Fases 1–4 (arquitetura, CRUD, Viagens, orçamento, relatórios, gráficos e cartões).
+> Documento vivo. Reflete o estado ao final da **Fase 7** (notificações, reforço de segurança e preparação
+> para distribuição iOS). Entregues as Fases 1–5 e 7; a **Fase 6 (Open Finance real)** segue pendente por
+> depender de um agregador externo pago — a abstração `IBankIntegrationProvider` já está pronta para isso.
 
 ## 1. Objetivo
 
@@ -102,6 +103,10 @@ Centralizadas no cálculo do dashboard e nos serviços — e cobertas por testes
 - Token no app guardado no **Keychain** via `SecureStorage`.
 - Nenhuma senha bancária é solicitada ou armazenada; Open Finance usa consentimento.
 - Em desenvolvimento **não se usa dado financeiro real** — há um usuário demo fictício.
+- **Rate limiting** nos endpoints de autenticação (janela fixa) contra força bruta; login responde com
+  mensagem genérica (sem revelar se o e-mail existe).
+- **Cabeçalhos de segurança** nas respostas (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`).
+- **Política de senha**: mínimo de 8 caracteres com letras e números.
 
 ## 7. Integração bancária
 
@@ -132,5 +137,11 @@ nas regras financeiras. Fornecedores a avaliar, requisitos, custos e limitaçõe
   `preview` analisa o arquivo e marca duplicados; `commit` importa os itens selecionados). Conciliação
   **idempotente** por `ExternalId` (FITID do OFX ou hash dos dados no CSV, prefixado pela conta) — reimportar
   não duplica. No app: tela **Importar extrato** (escolher arquivo, revisar com seleção, importar). 55 testes.
-- **Fase 6**: Open Finance real e sincronização bancária.
-- **Fase 7**: notificações, reforço de segurança, mais testes e preparação para distribuição iOS.
+- **Fase 6 (pendente)**: Open Finance real e sincronização bancária — depende de um agregador externo
+  (Pluggy/Belvo/Klavi) com credenciais e, em produção, custo. Basta registrar outra implementação de
+  `IBankIntegrationProvider` em `AddInfrastructure`. Alternativa sem custo já disponível: importar OFX (Fase 5).
+- **Fase 7 (entregue)**: **notificações** (`NotificationPreferenceService` + `AlertsService`/`/api/notifications`:
+  alertas de orçamento no limite, faturas e contas a vencer, respeitando as preferências) e tela de
+  **Alertas e notificações** no app; **reforço de segurança** (rate limiting na autenticação, cabeçalhos de
+  segurança, política de senha com letras+números) e **preparação para iOS** (`Info.plist` + `docs/distribuicao-ios.md`).
+  64 testes no backend.

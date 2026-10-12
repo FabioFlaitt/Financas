@@ -109,6 +109,17 @@
                 <VerticalStackLayout Spacing="1" BackgroundColor="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}">
                     <Grid Style="{StaticResource NavRow}">
                         <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnNotificationsTapped" />
+                        </Grid.GestureRecognizers>
+                        <Label Grid.Column="0" Text="🔔" Style="{StaticResource NavIcon}" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                            <Label Text="Alertas e notificações" Style="{StaticResource NavText}" />
+                            <Label Text="Avisos e preferências" FontSize="11" TextColor="#919191" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Style="{StaticResource NavChevron}" />
+                    </Grid>
+                    <Grid Style="{StaticResource NavRow}">
+                        <Grid.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnTripsTapped" />
                         </Grid.GestureRecognizers>
                         <Label Grid.Column="0" Text="🚗" Style="{StaticResource NavIcon}" />

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:models="clr-namespace:FinanceApp.Mobile.Models"
+             x:Class="FinanceApp.Mobile.Views.NotificationsPage"
+             x:DataType="vm:NotificationsViewModel"
+             Title="Alertas e notificações"
+             BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
+
+    <ContentPage.Resources>
+        <Style x:Key="SectionTitle" TargetType="Label">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="Margin" Value="4,10,4,4" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+        </Style>
+    </ContentPage.Resources>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="8">
+
+                <Label Text="Avisos" Style="{StaticResource SectionTitle}" />
+                <Border Padding="4" StrokeShape="RoundRectangle 12"
+                        Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Alerts}" Spacing="0">
+                        <BindableLayout.EmptyView>
+                            <VerticalStackLayout Padding="20" Spacing="4">
+                                <Label Text="🎉" FontSize="28" HorizontalOptions="Center" />
+                                <Label Text="Tudo em dia! Nenhum aviso no momento." FontSize="13"
+                                       HorizontalTextAlignment="Center" TextColor="#919191" />
+                            </VerticalStackLayout>
+                        </BindableLayout.EmptyView>
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:AlertItem">
+                                <Grid ColumnDefinitions="6,*" ColumnSpacing="10" Padding="10,12">
+                                    <BoxView Grid.Column="0" CornerRadius="3" VerticalOptions="Fill"
+                                             Color="{Binding SeverityColorHex, Converter={StaticResource HexColor}}" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                        <Label Text="{Binding Title}" FontSize="14" FontAttributes="Bold"
+                                               TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                                        <Label Text="{Binding Detail}" FontSize="12"
+                                               TextColor="{AppThemeBinding Light=#6E6E6E, Dark=#9AA4AF}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="Preferências" Style="{StaticResource SectionTitle}" />
+                <Border Padding="4" StrokeShape="RoundRectangle 12"
+                        Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Preferences}" Spacing="0">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PreferenceRow">
+                                <Grid ColumnDefinitions="*,Auto" Padding="12,10">
+                                    <Label Grid.Column="0" Text="{Binding TypeLabel}" FontSize="14" VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                                    <Switch Grid.Column="1" IsToggled="{Binding Enabled}" VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="Os avisos são calculados a partir dos seus dados (orçamentos, faturas e contas a vencer)."
+                       FontSize="11" TextColor="#919191" Margin="4,8,4,20" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

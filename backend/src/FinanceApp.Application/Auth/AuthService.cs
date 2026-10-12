@@ -43,8 +43,9 @@ public class AuthService : IAuthService
         var email = request.Email.Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
             throw new AppValidationException(nameof(request.Email), "E-mail inválido.");
-        if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 8)
-            throw new AppValidationException(nameof(request.Password), "A senha deve ter ao menos 8 caracteres.");
+        if (!IsPasswordStrong(request.Password))
+            throw new AppValidationException(nameof(request.Password),
+                "A senha deve ter ao menos 8 caracteres, incluindo letras e números.");
         if (await _db.Users.AnyAsync(u => u.Email == email, ct))
             throw new AppValidationException(nameof(request.Email), "Já existe uma conta com este e-mail.");
 
@@ -74,6 +75,11 @@ public class AuthService : IAuthService
             ExpiresAtUtc = expires
         };
     }
+
+    /// <summary>Política de senha: mínimo de 8 caracteres contendo ao menos uma letra e um número.</summary>
+    private static bool IsPasswordStrong(string? password)
+        => !string.IsNullOrWhiteSpace(password) && password.Length >= 8
+           && password.Any(char.IsLetter) && password.Any(char.IsDigit);
 
     public async Task<AuthResult> LoginAsync(LoginRequest request, CancellationToken ct = default)
     {

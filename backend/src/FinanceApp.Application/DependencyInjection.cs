@@ -5,6 +5,7 @@ using FinanceApp.Application.Cards;
 using FinanceApp.Application.Categories;
 using FinanceApp.Application.Dashboard;
 using FinanceApp.Application.Imports;
+using FinanceApp.Application.Notifications;
 using FinanceApp.Application.Recurrences;
 using FinanceApp.Application.Reports;
 using FinanceApp.Application.Transactions;
@@ -30,6 +31,8 @@ public static class DependencyInjection
         services.AddScoped<ICardService, CardService>();
         services.AddScoped<IInvoiceService, InvoiceService>();
         services.AddScoped<IStatementImportService, StatementImportService>();
+        services.AddScoped<INotificationPreferenceService, NotificationPreferenceService>();
+        services.AddScoped<IAlertsService, AlertsService>();
         return services;
     }
 }

@@ -8,6 +8,7 @@ using FinanceApp.Infrastructure;
 using FinanceApp.Infrastructure.Persistence;
 using FinanceApp.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -57,6 +58,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+// --- Rate limiting: protege os endpoints de autenticação contra força bruta ---
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("auth", opt =>
+    {
+        opt.PermitLimit = 10;                     // até 10 tentativas
+        opt.Window = TimeSpan.FromMinutes(1);     // por minuto, por instância
+        opt.QueueLimit = 0;
+    });
+});
+
 // --- CORS (origens liberadas via config; libera tudo em desenvolvimento) ---
 const string CorsPolicy = "FinanceAppCors";
 builder.Services.AddCors(options => options.AddPolicy(CorsPolicy, policy =>
@@ -99,6 +112,7 @@ await InitializeDatabaseAsync(app);
 
 // --- Pipeline HTTP ---
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue("Swagger:Enabled", true))
 {
@@ -107,6 +121,7 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue("Swagger:Enabl
 }
 
 app.UseCors(CorsPolicy);
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
