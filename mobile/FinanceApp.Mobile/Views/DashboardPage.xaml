@@ -51,11 +51,6 @@
                                TextColor="{AppThemeBinding Light=#0D47A1, Dark=#90CAF9}" />
                         <Label Text="Resumo do mês" Style="{StaticResource CardLabel}" />
                     </VerticalStackLayout>
-                    <Border Grid.Column="1" IsVisible="{Binding IsDemo}"
-                            BackgroundColor="#FFF3CD" Stroke="#F9A825" StrokeShape="RoundRectangle 8"
-                            Padding="8,4" VerticalOptions="Center">
-                        <Label Text="DEMONSTRAÇÃO" FontSize="10" FontAttributes="Bold" TextColor="#8A6D00" />
-                    </Border>
                 </Grid>
 
                 <!-- Erro -->

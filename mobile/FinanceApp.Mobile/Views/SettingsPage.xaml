@@ -43,13 +43,13 @@
             <Border Padding="16" BackgroundColor="#0D47A1" StrokeShape="RoundRectangle 14" Margin="0,4,0,4">
                 <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                     <VerticalStackLayout Grid.Column="0" Spacing="2">
-                        <Label Text="Conta" FontSize="12" TextColor="#BBD4F5" />
-                        <Label x:Name="UserLabel" Text="—" FontSize="20" FontAttributes="Bold" TextColor="White" />
+                        <Label Text="Perfil" FontSize="12" TextColor="#BBD4F5" />
+                        <Label Text="Flaitt Finanças" FontSize="20" FontAttributes="Bold" TextColor="White" />
+                        <Label Text="Seus dados ficam salvos no seu celular" FontSize="11" TextColor="#BBD4F5" />
                     </VerticalStackLayout>
-                    <Border x:Name="DemoBadge" Grid.Column="1" IsVisible="False"
-                            BackgroundColor="#FFF3CD" Stroke="#F9A825" StrokeShape="RoundRectangle 8"
+                    <Border Grid.Column="1" BackgroundColor="#1B5E20" StrokeShape="RoundRectangle 8"
                             Padding="8,4" VerticalOptions="Center">
-                        <Label Text="DEMONSTRAÇÃO" FontSize="10" FontAttributes="Bold" TextColor="#8A6D00" />
+                        <Label Text="🔒 SÓ NESTE APARELHO" FontSize="10" FontAttributes="Bold" TextColor="White" />
                     </Border>
                 </Grid>
             </Border>
@@ -131,6 +131,17 @@
                     </Grid>
                     <Grid Style="{StaticResource NavRow}">
                         <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnBackupTapped" />
+                        </Grid.GestureRecognizers>
+                        <Label Grid.Column="0" Text="🌐" Style="{StaticResource NavIcon}" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                            <Label Text="Backup dos dados" Style="{StaticResource NavText}" />
+                            <Label Text="Exportar uma cópia dos dados do aparelho" FontSize="11" TextColor="#919191" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Style="{StaticResource NavChevron}" />
+                    </Grid>
+                    <Grid Style="{StaticResource NavRow}">
+                        <Grid.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnImportTapped" />
                         </Grid.GestureRecognizers>
                         <Label Grid.Column="0" Text="📥" Style="{StaticResource NavIcon}" />
@@ -148,7 +159,7 @@
             <Border StrokeShape="RoundRectangle 14" Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}"
                     BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}" Padding="16">
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="Meu Controle Financeiro" FontSize="14" FontAttributes="Bold"
+                    <Label Text="Flaitt Finanças" FontSize="14" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
                     <Label x:Name="VersionLabel" Text="Versão 1.0" FontSize="12" TextColor="#919191" />
                 </VerticalStackLayout>

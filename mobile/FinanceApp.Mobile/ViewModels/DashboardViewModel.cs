@@ -11,12 +11,10 @@ namespace FinanceApp.Mobile.ViewModels;
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly FinanceApiClient _api;
-    private readonly SessionService _session;
 
-    public DashboardViewModel(FinanceApiClient api, SessionService session)
+    public DashboardViewModel(FinanceApiClient api)
     {
         _api = api;
-        _session = session;
         var now = DateTime.Today;
         _year = now.Year;
         _month = now.Month;
@@ -26,7 +24,6 @@ public partial class DashboardViewModel : ObservableObject
     private int _month;
 
     [ObservableProperty] private bool _isBusy;
-    [ObservableProperty] private bool _isDemo;
     [ObservableProperty] private bool _hasError;
     [ObservableProperty] private string _errorMessage = string.Empty;
     [ObservableProperty] private string _monthLabel = string.Empty;
@@ -53,50 +50,12 @@ public partial class DashboardViewModel : ObservableObject
 
         try
         {
-            await _session.LoadAsync();
-
-            // Tenta autenticar com o usuário de demonstração quando ainda não há sessão.
-            if (!_session.IsAuthenticated)
-            {
-                try
-                {
-                    var auth = await _api.LoginAsync("demo@financas.app", "Demo@12345");
-                    await _session.SignInAsync(auth.AccessToken, auth.Name);
-                }
-                catch { /* sem backend/credenciais: cai no fallback de demonstração abaixo */ }
-            }
-
-            DashboardResult data;
-            if (_session.IsAuthenticated)
-            {
-                data = await _api.GetDashboardAsync(_year, _month);
-                IsDemo = false;
-            }
-            else if (ApiConfig.FallbackToDemoData)
-            {
-                data = DemoDashboardData.Build();
-                IsDemo = true;
-            }
-            else
-            {
-                throw new ApiException("Não foi possível conectar ao servidor.");
-            }
-
-            Apply(data);
-            Greeting = _session.UserName is { Length: > 0 } name ? $"Olá, {name.Split(' ')[0]}!" : "Olá!";
-        }
-        catch (Exception ex) when (ApiConfig.FallbackToDemoData)
-        {
-            // Qualquer falha de rede: exibe dados de demonstração claramente identificados.
-            Apply(DemoDashboardData.Build());
-            IsDemo = true;
-            _ = ex; // silenciado propositalmente no fallback
+            Apply(await _api.GetDashboardAsync(_year, _month));
         }
         catch (Exception ex)
         {
             HasError = true;
-            ErrorMessage = "Não foi possível carregar o painel. Verifique sua conexão e tente novamente.";
-            _ = ex;
+            ErrorMessage = "Não foi possível carregar o painel: " + ex.Message;
         }
         finally
         {

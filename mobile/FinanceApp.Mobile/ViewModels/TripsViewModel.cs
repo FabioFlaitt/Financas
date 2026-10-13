@@ -16,7 +16,8 @@ public partial class TripsViewModel : ObservableObject
 
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private bool _hasTrips;
-    [ObservableProperty] private bool _isDemoOrOffline;
+    [ObservableProperty] private bool _hasError;
+    [ObservableProperty] private string _errorMessage = string.Empty;
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -29,18 +30,14 @@ public partial class TripsViewModel : ObservableObject
             Trips.Clear();
             foreach (var t in trips) Trips.Add(t);
             HasTrips = Trips.Count > 0;
-            IsDemoOrOffline = false;
+            HasError = false;
         }
-        catch
+        catch (Exception ex)
         {
-            // Sem backend: exibe viagens de demonstração claramente identificadas.
             Trips.Clear();
-            if (ApiConfig.FallbackToDemoData)
-            {
-                foreach (var t in DemoTripsData.Build()) Trips.Add(t);
-            }
-            HasTrips = Trips.Count > 0;
-            IsDemoOrOffline = true;
+            HasTrips = false;
+            ErrorMessage = "Não foi possível carregar as viagens: " + ex.Message;
+            HasError = true;
         }
         finally { IsBusy = false; }
     }

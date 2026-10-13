@@ -20,8 +20,7 @@ public static class MauiProgram
             });
 
         // Infraestrutura do app (uma instância por sessão)
-        builder.Services.AddSingleton<HttpClient>();
-        builder.Services.AddSingleton<SessionService>();
+        builder.Services.AddSingleton<LocalFinanceStore>();
         builder.Services.AddSingleton<FinanceApiClient>();
         builder.Services.AddSingleton<LocationService>();
 

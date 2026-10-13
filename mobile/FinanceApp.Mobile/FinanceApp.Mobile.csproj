@@ -24,6 +24,15 @@
     <PackageReference Include="Microsoft.Maui.Controls.Maps" Version="$(MauiVersion)" />
     <!-- Logging de depuração usado em MauiProgram (builder.Logging.AddDebug) -->
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+    <!-- SQLite nativo mais recente (EF Core 8 traz 2.1.6, sem alinhamento de 16 KB exigido pelo Android 16) -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Mesmas regras de negócio do backend, executadas localmente sobre SQLite no aparelho -->
+    <ProjectReference Include="..\..\backend\src\FinanceApp.Domain\FinanceApp.Domain.csproj" />
+    <ProjectReference Include="..\..\backend\src\FinanceApp.Application\FinanceApp.Application.csproj" />
+    <ProjectReference Include="..\..\backend\src\FinanceApp.Infrastructure\FinanceApp.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@
       e **incrementar** `ApplicationVersion` (build number) a cada envio.
 - [ ] `Platforms/iOS/Info.plist` com as descrições de uso (já presentes): `NSFaceIDUsageDescription`,
       `NSLocationWhenInUseUsageDescription`, `ITSAppUsesNonExemptEncryption=false`, localização `pt-BR`.
-- [ ] `Services/ApiConfig.cs`: apontar `BaseUrl` para a API de produção (HTTPS) e revisar `FallbackToDemoData`.
+- [ ] Dados 100% locais (SQLite no aparelho): orientar o usuário a usar *Config. › Backup dos dados* antes de trocar de aparelho.
 - [ ] Ícone e splash definidos (`Resources/AppIcon`, `Resources/Splash`).
 
 ## 2. Build sem assinatura (Sideloadly / AltStore — uso pessoal)

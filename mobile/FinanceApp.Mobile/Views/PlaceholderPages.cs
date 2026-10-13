@@ -10,7 +10,7 @@ public abstract class FeaturePlaceholderPage : ContentPage
     protected FeaturePlaceholderPage(string title, string emoji, string heading, string description, string phase)
     {
         Title = title;
-        BackgroundColor = Application.Current?.RequestedTheme == AppTheme.Dark ? Color.FromArgb("#101317") : Color.FromArgb("#F2F4F7");
+        BackgroundColor = Microsoft.Maui.Controls.Application.Current?.RequestedTheme == AppTheme.Dark ? Color.FromArgb("#101317") : Color.FromArgb("#F2F4F7");
 
         Content = new ScrollView
         {

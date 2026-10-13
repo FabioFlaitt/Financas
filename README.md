@@ -84,14 +84,17 @@ comparação mensal), o CRUD de lançamentos, o hasher de senha e o pipeline HTT
 
 ## 4) Rodar o app (.NET MAUI)
 
-O app consome a API em `ApiConfig.BaseUrl` (padrão `http://localhost:5219`). Ao abrir, ele tenta
-autenticar com o usuário de demonstração; se a API não estiver acessível, exibe **dados de
-demonstração** claramente identificados (para a interface nunca ficar vazia).
+O app funciona **100% local**: todos os dados ficam em um banco SQLite na área privada do aplicativo
+(`financas.db3`), sem servidor e sem internet. Ele executa as **mesmas regras de negócio** do backend
+(camadas `Domain` + `Application` + `Infrastructure` referenciadas pelo projeto MAUI), então orçamento,
+faturas, importação CSV/OFX, relatórios e viagens se comportam igual à API.
 
-- **Simulador iOS:** `http://localhost:5219` funciona direto.
-- **iPhone físico:** troque `BaseUrl` para o IP da sua máquina na rede (ex.:
-  `http://192.168.0.10:5219`) em `mobile/FinanceApp.Mobile/Services/ApiConfig.cs`, ou use um
-  domínio HTTPS. Em produção, **sempre HTTPS**.
+- Na primeira abertura o app cria o perfil local com categorias e preferências padrão.
+- **Backup:** *Config. › Backup dos dados* exporta uma cópia do banco (compartilhar/salvar em nuvem).
+  Os dados só existem no aparelho — sem backup, trocar de celular ou desinstalar o app os perde.
+- A API (`backend/`) continua no repositório para uso futuro (sincronização entre aparelhos / Open Finance).
+- Limitação conhecida: o banco local é criado com `EnsureCreated`; mudanças futuras de esquema exigirão
+  uma estratégia de migração local antes de publicar atualizações.
 
 ### Compilar e abrir no Xcode / dispositivo
 

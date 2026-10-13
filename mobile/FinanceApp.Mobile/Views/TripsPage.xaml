@@ -13,10 +13,9 @@
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto,*">
-        <Border Grid.Row="0" IsVisible="{Binding IsDemoOrOffline}" Margin="16,12,16,0"
-                BackgroundColor="#FFF3CD" Stroke="#F9A825" StrokeShape="RoundRectangle 10" Padding="12">
-            <Label Text="Modo demonstração: estas viagens são exemplos. Entre na sua conta para registrar e sincronizar as suas."
-                   FontSize="12" TextColor="#8A6D00" />
+        <Border Grid.Row="0" IsVisible="{Binding HasError}" Margin="16,12,16,0"
+                BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 10" Padding="12">
+            <Label Text="{Binding ErrorMessage}" FontSize="12" TextColor="#8B1A12" />
         </Border>
 
         <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">

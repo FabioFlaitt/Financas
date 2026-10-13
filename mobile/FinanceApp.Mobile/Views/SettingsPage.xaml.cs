@@ -4,20 +4,17 @@ namespace FinanceApp.Mobile.Views;
 
 public partial class SettingsPage : ContentPage
 {
-    private readonly SessionService _session;
+    private readonly LocalFinanceStore _store;
 
-    public SettingsPage(SessionService session)
+    public SettingsPage(LocalFinanceStore store)
     {
         InitializeComponent();
-        _session = session;
+        _store = store;
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
-
-        UserLabel.Text = string.IsNullOrWhiteSpace(_session.UserName) ? "Demonstração" : _session.UserName;
-        DemoBadge.IsVisible = !_session.IsAuthenticated;
 
         try { VersionLabel.Text = $"Versão {AppInfo.Current.VersionString}"; }
         catch { /* AppInfo pode não estar disponível em alguns ambientes */ }
@@ -39,4 +36,21 @@ public partial class SettingsPage : ContentPage
     private async void OnNotificationsTapped(object? sender, EventArgs e) => await OpenAsync<NotificationsPage>();
 
     private async void OnTripsTapped(object? sender, EventArgs e) => await OpenAsync<TripsPage>();
+
+    private async void OnBackupTapped(object? sender, EventArgs e)
+    {
+        try
+        {
+            var file = await _store.CreateBackupFileAsync();
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = "Backup Flaitt Finanças",
+                File = new ShareFile(file)
+            });
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Backup", "Não foi possível gerar o backup: " + ex.Message, "OK");
+        }
+    }
 }

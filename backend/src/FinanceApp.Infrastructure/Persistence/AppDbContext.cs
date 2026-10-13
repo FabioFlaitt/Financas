@@ -40,6 +40,20 @@ public class AppDbContext : DbContext, IApplicationDbContext
             property.SetScale(2);
         }
 
+        // SQLite (modo local no celular) não agrega/ordena o tipo decimal: guarda como double.
+        // O arredondamento monetário continua sendo feito pelas regras da aplicação.
+        if (Database.IsSqlite())
+        {
+            foreach (var property in modelBuilder.Model.GetEntityTypes()
+                         .SelectMany(t => t.GetProperties())
+                         .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
+            {
+                // Para decimal? o EF adapta automaticamente o conversor de decimal.
+                property.SetValueConverter(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<decimal, double>(
+                    v => (double)v, v => (decimal)v));
+            }
+        }
+
         base.OnModelCreating(modelBuilder);
     }
 }
