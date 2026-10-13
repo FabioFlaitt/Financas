@@ -102,6 +102,12 @@ public class TripDto
     public TripSummary Summary { get; set; } = new();
 
     public bool IsInProgress => Status == TripStatus.InProgress;
+
+    /// <summary>Saída → destino, quando informados (para o histórico).</summary>
+    public string? RouteLabel =>
+        string.IsNullOrWhiteSpace(Origin) && string.IsNullOrWhiteSpace(Destination)
+            ? null
+            : $"{Origin ?? "?"} → {Destination ?? "?"}";
 }
 
 public class TripExpenseDto

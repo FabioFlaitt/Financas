@@ -1,4 +1,6 @@
 using System.Globalization;
+using FinanceApp.Mobile.Models;
+using FinanceApp.Mobile.Services;
 using FinanceApp.Mobile.ViewModels;
 using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Devices.Sensors;
@@ -10,6 +12,7 @@ public partial class TripDetailPage : ContentPage
 {
     private readonly TripDetailViewModel _vm;
     private Polyline? _route;
+    private Polyline? _plannedRoute;
     private bool _centeredOnce;
 
     public TripDetailPage(TripDetailViewModel vm)
@@ -18,6 +21,7 @@ public partial class TripDetailPage : ContentPage
         BindingContext = _vm = vm;
         _vm.RoutePointAdded += OnRoutePointAdded;
         _vm.RequestCenter += OnRequestCenter;
+        _vm.RoutePlanned += OnRoutePlanned;
     }
 
     public async Task InitializeAsync(Guid tripId) => await _vm.LoadAsync(tripId);
@@ -46,6 +50,53 @@ public partial class TripDetailPage : ContentPage
         var line = new Polyline { StrokeColor = Color.FromArgb("#0D47A1"), StrokeWidth = 6 };
         TripMap.MapElements.Add(line);
         return line;
+    }
+
+    private void OnRoutePlanned(PlannedRoute plan)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            // Rota planejada em laranja (o trajeto real continua em azul).
+            if (_plannedRoute is not null) TripMap.MapElements.Remove(_plannedRoute);
+            if (plan.Path.Count > 1)
+            {
+                _plannedRoute = new Polyline { StrokeColor = Color.FromArgb("#EF6C00"), StrokeWidth = 4 };
+                foreach (var p in plan.Path) _plannedRoute.Geopath.Add(p);
+                TripMap.MapElements.Add(_plannedRoute);
+                TripMap.MoveToRegion(MapSpan.FromCenterAndRadius(plan.Path[plan.Path.Count / 2], Distance.FromKilometers(20)));
+            }
+
+            foreach (var toll in plan.Tolls)
+            {
+                TripMap.Pins.Add(new Pin
+                {
+                    Label = toll.Name,
+                    Address = toll.Price.ToString("C2", new CultureInfo("pt-BR")),
+                    Location = new Location(toll.Latitude, toll.Longitude),
+                    Type = PinType.Place
+                });
+            }
+        });
+    }
+
+    private async void OnExpenseTapped(object? sender, EventArgs e)
+    {
+        if (sender is not Element { BindingContext: TripExpenseDto expense }) return;
+
+        var action = await DisplayActionSheet(expense.Description ?? expense.TypeLabel, "Cancelar", null, "Editar valor", "Excluir");
+        if (action == "Editar valor")
+        {
+            var current = expense.Amount.ToString("0.00", new CultureInfo("pt-BR"));
+            var input = await DisplayPromptAsync("Editar gasto", "Novo valor (R$):", "Salvar", "Cancelar",
+                initialValue: current, keyboard: Keyboard.Numeric);
+            if (TryParse(input, out var amount) && amount > 0)
+                await _vm.UpdateExpenseAsync(expense.Id, expense.Type, expense.Description, amount, expense.Liters);
+        }
+        else if (action == "Excluir")
+        {
+            var confirm = await DisplayAlert("Excluir gasto", "Deseja excluir este gasto da viagem?", "Excluir", "Cancelar");
+            if (confirm) await _vm.RemoveExpenseAsync(expense.Id);
+        }
     }
 
     private async void OnToggleTracking(object? sender, EventArgs e)

@@ -5,19 +5,30 @@ namespace FinanceApp.Mobile.Views;
 public partial class SettingsPage : ContentPage
 {
     private readonly LocalFinanceStore _store;
+    private readonly AppSettingsService _settings;
 
-    public SettingsPage(LocalFinanceStore store)
+    public SettingsPage(LocalFinanceStore store, AppSettingsService settings)
     {
         InitializeComponent();
         _store = store;
+        _settings = settings;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
 
         try { VersionLabel.Text = $"Versão {AppInfo.Current.VersionString}"; }
         catch { /* AppInfo pode não estar disponível em alguns ambientes */ }
+
+        try { TollGuruKeyEntry.Text = await _settings.GetTollGuruApiKeyAsync(); }
+        catch { /* ignora falha ao ler chave */ }
+    }
+
+    private async void OnSaveTollGuruKey(object? sender, EventArgs e)
+    {
+        await _settings.SetTollGuruApiKeyAsync(TollGuruKeyEntry.Text);
+        await DisplayAlert("Integrações", "Chave salva.", "OK");
     }
 
     private Task OpenAsync<TPage>() where TPage : Page

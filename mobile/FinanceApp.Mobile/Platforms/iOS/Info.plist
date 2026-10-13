@@ -34,6 +34,12 @@
 	<string>Usamos o Face ID para proteger o acesso às suas informações financeiras.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Usamos sua localização para mapear a rota, os quilômetros e o mapa da sua viagem.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Usamos sua localização em segundo plano durante a viagem para registrar automaticamente os pedágios ao passar por eles, mesmo com o app fechado ou o celular bloqueado.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Usamos o microfone quando você toca em "ditar lançamento" para transcrever a fala em um gasto.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

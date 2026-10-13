@@ -201,6 +201,9 @@ public class FinanceApiClient
     public Task<TripExpenseDto> AddTripExpenseAsync(Guid tripId, object body, CancellationToken ct = default)
         => Using<Trp.ITripService>().Run(async s => Map<TripExpenseDto>(await s.AddExpenseAsync(tripId, Map<Trp.AddTripExpenseRequest>(body), ct)));
 
+    public Task<TripExpenseDto> UpdateTripExpenseAsync(Guid tripId, Guid expenseId, object body, CancellationToken ct = default)
+        => Using<Trp.ITripService>().Run(async s => Map<TripExpenseDto>(await s.UpdateExpenseAsync(tripId, expenseId, Map<Trp.UpdateTripExpenseRequest>(body), ct)));
+
     public Task DeleteTripExpenseAsync(Guid tripId, Guid expenseId, CancellationToken ct = default)
         => Using<Trp.ITripService>().Run(s => s.DeleteExpenseAsync(tripId, expenseId, ct));
 

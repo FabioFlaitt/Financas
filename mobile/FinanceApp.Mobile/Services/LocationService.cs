@@ -20,7 +20,20 @@ public class LocationService
             var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
             if (status != PermissionStatus.Granted)
                 status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
-            return status == PermissionStatus.Granted;
+            if (status != PermissionStatus.Granted) return false;
+
+            // Tenta elevar para localização contínua (background) — necessário para detectar
+            // pedágios com o celular bloqueado durante a viagem. Se o usuário não conceder,
+            // o rastreio ainda funciona com o app em primeiro plano.
+            try
+            {
+                var always = await Permissions.CheckStatusAsync<Permissions.LocationAlways>();
+                if (always != PermissionStatus.Granted)
+                    await Permissions.RequestAsync<Permissions.LocationAlways>();
+            }
+            catch { /* nem toda plataforma expõe LocationAlways; segue com WhenInUse */ }
+
+            return true;
         }
         catch
         {

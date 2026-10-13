@@ -89,6 +89,14 @@ public record AddTripExpenseRequest
     public double? Longitude { get; init; }
 }
 
+public record UpdateTripExpenseRequest
+{
+    public TripExpenseType Type { get; init; } = TripExpenseType.Toll;
+    public string? Description { get; init; }
+    public decimal Amount { get; init; }
+    public decimal? Liters { get; init; }
+}
+
 public record AddLocationPointRequest
 {
     public double Latitude { get; init; }

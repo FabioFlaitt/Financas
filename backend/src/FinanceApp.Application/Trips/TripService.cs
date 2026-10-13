@@ -18,6 +18,7 @@ public interface ITripService
     Task DeleteAsync(Guid id, CancellationToken ct = default);
 
     Task<TripExpenseDto> AddExpenseAsync(Guid tripId, AddTripExpenseRequest request, CancellationToken ct = default);
+    Task<TripExpenseDto> UpdateExpenseAsync(Guid tripId, Guid expenseId, UpdateTripExpenseRequest request, CancellationToken ct = default);
     Task DeleteExpenseAsync(Guid tripId, Guid expenseId, CancellationToken ct = default);
 
     Task<TripSummary> AddLocationPointAsync(Guid tripId, AddLocationPointRequest request, CancellationToken ct = default);
@@ -149,6 +150,24 @@ public class TripService : ITripService
             Longitude = request.Longitude
         };
         _db.TripExpenses.Add(expense);
+        await _db.SaveChangesAsync(ct);
+        return ToExpenseDto(expense);
+    }
+
+    public async Task<TripExpenseDto> UpdateExpenseAsync(Guid tripId, Guid expenseId, UpdateTripExpenseRequest request, CancellationToken ct = default)
+    {
+        if (request.Amount <= 0)
+            throw new AppValidationException(nameof(request.Amount), "O valor deve ser maior que zero.");
+
+        var expense = await _db.TripExpenses
+            .FirstOrDefaultAsync(e => e.Id == expenseId && e.TripId == tripId && e.UserId == UserId, ct)
+            ?? throw NotFoundException.For("Gasto da viagem", expenseId);
+
+        expense.Type = request.Type;
+        expense.Description = request.Description?.Trim();
+        expense.Amount = Math.Abs(request.Amount);
+        expense.Liters = request.Liters;
+        expense.UpdatedAtUtc = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
         return ToExpenseDto(expense);
     }

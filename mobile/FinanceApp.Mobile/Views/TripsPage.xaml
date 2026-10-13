@@ -39,6 +39,8 @@
                                 <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="2">
                                     <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold"
                                            TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                                    <Label Text="{Binding RouteLabel}" FontSize="12" TextColor="#6E6E6E"
+                                           IsVisible="{Binding RouteLabel, Converter={StaticResource IsNotNull}}" />
                                     <Label Text="{Binding StatusLabel}" FontSize="11" TextColor="#919191" />
                                 </VerticalStackLayout>
                                 <Label Grid.Row="0" Grid.Column="1" VerticalOptions="Center"
@@ -50,7 +52,7 @@
                                     <Label FontSize="12" TextColor="#6E6E6E"
                                            Text="{Binding Summary.CostPerKm, Converter={StaticResource Currency}}" />
                                     <Label FontSize="12" TextColor="#6E6E6E"
-                                           Text="{Binding Summary.TollCount, StringFormat='{0} pedágio(s)'}" />
+                                           Text="{Binding Summary.TollTotal, Converter={StaticResource Currency}, StringFormat='Pedágios: {0}'}" />
                                 </HorizontalStackLayout>
                             </Grid>
                         </Border>
