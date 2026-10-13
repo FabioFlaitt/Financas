@@ -79,7 +79,7 @@ public partial class VoiceExpenseViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task ListenAsync()
     {
         ErrorMessage = null; SuccessMessage = null;

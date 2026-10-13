@@ -26,15 +26,21 @@ public sealed class SpeechToTextService : ISpeechToTextService
     public async Task<string> ListenAsync(CultureInfo culture, Action<string>? onPartial = null, CancellationToken ct = default)
     {
         var completion = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var lastPartial = string.Empty;
 
         void OnPartial(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(e.RecognitionResult)) onPartial?.Invoke(e.RecognitionResult);
+            if (!string.IsNullOrEmpty(e.RecognitionResult))
+            {
+                lastPartial = e.RecognitionResult;
+                onPartial?.Invoke(e.RecognitionResult);
+            }
         }
 
         void OnDone(object? sender, SpeechToTextRecognitionResultCompletedEventArgs e)
         {
-            completion.TrySetResult(e.RecognitionResult.Text?.Trim() ?? string.Empty);
+            var text = e.RecognitionResult.Text?.Trim();
+            completion.TrySetResult(!string.IsNullOrEmpty(text) ? text : lastPartial.Trim());
         }
 
         SpeechToText.Default.RecognitionResultUpdated += OnPartial;
@@ -42,7 +48,7 @@ public sealed class SpeechToTextService : ISpeechToTextService
         try
         {
             await SpeechToText.Default.StartListenAsync(new SpeechToTextOptions { Culture = culture, ShouldReportPartialResults = true }, ct);
-            using var _ = ct.Register(() => completion.TrySetResult(string.Empty));
+            using var _ = ct.Register(() => completion.TrySetResult(lastPartial.Trim()));
             return await completion.Task;
         }
         finally
