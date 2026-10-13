@@ -154,6 +154,25 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Zona crítica -->
+            <Label Text="ZONA CRÍTICA" Style="{StaticResource GroupTitle}" />
+            <Border StrokeShape="RoundRectangle 14" Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}" Padding="0">
+                <VerticalStackLayout Spacing="1" BackgroundColor="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}">
+                    <Grid Style="{StaticResource NavRow}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnResetTapped" />
+                        </Grid.GestureRecognizers>
+                        <Label Grid.Column="0" Text="🧹" Style="{StaticResource NavIcon}" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                            <Label Text="Começar do zero" Style="{StaticResource NavText}" TextColor="#C62828" />
+                            <Label Text="Apaga perfil, lançamentos e cartões deste aparelho (irreversível)."
+                                   FontSize="11" TextColor="#919191" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Style="{StaticResource NavChevron}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
             <!-- Sobre -->
             <Label Text="SOBRE" Style="{StaticResource GroupTitle}" />
             <Border StrokeShape="RoundRectangle 14" Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}"

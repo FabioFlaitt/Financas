@@ -27,6 +27,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<LocationService>();
         builder.Services.AddSingleton<ISpeechToTextService, SpeechToTextService>();
 
+        // --- Boas-vindas / criação do perfil local ---
+        builder.Services.AddTransient<WelcomeViewModel>();
+        builder.Services.AddTransient<WelcomePage>();
+
         // --- Ditar lançamento por voz ---
         builder.Services.AddTransient<VoiceExpenseViewModel>();
         builder.Services.AddTransient<VoiceExpensePage>();

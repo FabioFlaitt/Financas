@@ -39,27 +39,93 @@ public static class LocalInfrastructure
     }
 
     /// <summary>
-    /// Cria o banco (se não existir) e o perfil local com categorias e preferências padrão.
-    /// Idempotente: pode ser chamado a cada abertura do app.
+    /// Garante que o banco existe e, se já houver um perfil salvo, vincula o <see cref="LocalCurrentUser"/>.
+    /// NÃO cria perfil automaticamente — isso é responsabilidade da tela de boas-vindas.
+    /// Como efeito colateral: se o único usuário for o perfil "Meu perfil" criado automaticamente pela versão
+    /// antiga do app e sem nenhum dado financeiro, ele é apagado para forçar o fluxo de boas-vindas.
     /// </summary>
-    public static async Task InitializeLocalAsync(this IServiceProvider provider, CancellationToken ct = default)
+    public static async Task EnsureDatabaseAsync(this IServiceProvider provider, CancellationToken ct = default)
     {
         using var scope = provider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.EnsureCreatedAsync(ct);
 
-        var user = await db.Users.OrderBy(u => u.CreatedAtUtc).FirstOrDefaultAsync(ct);
-        if (user is null)
+        var users = await db.Users.OrderBy(u => u.CreatedAtUtc).ToListAsync(ct);
+        if (users.Count == 1 && users[0].Email == LocalUserEmail && users[0].Name == "Meu perfil")
         {
-            user = new User { Name = "Meu perfil", Email = LocalUserEmail, PasswordHash = string.Empty };
-            db.Users.Add(user);
-            foreach (var category in DefaultCategories.CreateFor(user.Id))
-                db.Categories.Add(category);
-            foreach (NotificationType type in Enum.GetValues<NotificationType>())
-                db.NotificationPreferences.Add(new NotificationPreference { UserId = user.Id, Type = type });
-            await db.SaveChangesAsync(ct);
+            var legacyId = users[0].Id;
+            var hasData =
+                await db.Transactions.AnyAsync(t => t.UserId == legacyId, ct) ||
+                await db.Accounts.AnyAsync(a => a.UserId == legacyId, ct) ||
+                await db.CreditCards.AnyAsync(c => c.UserId == legacyId, ct);
+            if (!hasData)
+            {
+                var cats = await db.Categories.Where(c => c.UserId == legacyId).ToListAsync(ct);
+                var prefs = await db.NotificationPreferences.Where(p => p.UserId == legacyId).ToListAsync(ct);
+                db.Categories.RemoveRange(cats);
+                db.NotificationPreferences.RemoveRange(prefs);
+                db.Users.Remove(users[0]);
+                await db.SaveChangesAsync(ct);
+                users.Clear();
+            }
         }
 
+        provider.GetRequiredService<LocalCurrentUser>().UserId = users.FirstOrDefault()?.Id;
+    }
+
+    /// <summary>Retorna <c>true</c> se já existe um perfil no banco local.</summary>
+    public static async Task<bool> HasProfileAsync(this IServiceProvider provider, CancellationToken ct = default)
+    {
+        using var scope = provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return await db.Users.AnyAsync(ct);
+    }
+
+    /// <summary>Nome do perfil atual, ou <c>null</c> se ainda não houver um.</summary>
+    public static async Task<string?> GetProfileNameAsync(this IServiceProvider provider, CancellationToken ct = default)
+    {
+        using var scope = provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var u = await db.Users.OrderBy(x => x.CreatedAtUtc).FirstOrDefaultAsync(ct);
+        return u?.Name;
+    }
+
+    /// <summary>
+    /// Cria o perfil local com <paramref name="name"/> (e opcionalmente <paramref name="email"/>), semeia as
+    /// categorias e preferências de notificação padrão e vincula o usuário atual.
+    /// </summary>
+    public static async Task CreateProfileAsync(this IServiceProvider provider, string name, string? email = null, CancellationToken ct = default)
+    {
+        using var scope = provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        if (await db.Users.AnyAsync(ct))
+            throw new InvalidOperationException("Já existe um perfil local neste aparelho.");
+
+        var user = new User
+        {
+            Name = string.IsNullOrWhiteSpace(name) ? "Meu perfil" : name.Trim(),
+            Email = string.IsNullOrWhiteSpace(email) ? LocalUserEmail : email!.Trim().ToLowerInvariant(),
+            PasswordHash = string.Empty
+        };
+        db.Users.Add(user);
+        foreach (var category in DefaultCategories.CreateFor(user.Id))
+            db.Categories.Add(category);
+        foreach (NotificationType type in Enum.GetValues<NotificationType>())
+            db.NotificationPreferences.Add(new NotificationPreference { UserId = user.Id, Type = type });
+        await db.SaveChangesAsync(ct);
+
         provider.GetRequiredService<LocalCurrentUser>().UserId = user.Id;
+    }
+
+    /// <summary>
+    /// Helper usado por testes e pela composição legada: garante banco + perfil padrão em um único passo.
+    /// Em produção o app usa <see cref="EnsureDatabaseAsync"/> + <see cref="CreateProfileAsync"/>.
+    /// </summary>
+    public static async Task InitializeLocalAsync(this IServiceProvider provider, CancellationToken ct = default)
+    {
+        await provider.EnsureDatabaseAsync(ct);
+        if (!await provider.HasProfileAsync(ct))
+            await provider.CreateProfileAsync("Meu perfil", LocalUserEmail, ct);
     }
 }

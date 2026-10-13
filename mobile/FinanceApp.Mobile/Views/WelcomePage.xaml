@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             x:Class="FinanceApp.Mobile.Views.WelcomePage"
+             x:DataType="vm:WelcomeViewModel"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="#0D47A1">
+
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="24,48,24,24" Spacing="18">
+
+                <!-- Marca -->
+                <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                    <Label Text="🪙" FontSize="56" HorizontalOptions="Center" />
+                    <Label Text="Flaitt Finanças" FontSize="26" FontAttributes="Bold"
+                           HorizontalOptions="Center" TextColor="White" />
+                    <Label Text="Seu controle financeiro, só no seu aparelho." FontSize="13"
+                           HorizontalTextAlignment="Center" TextColor="#BBD4F5" />
+                </VerticalStackLayout>
+
+                <!-- Mensagens -->
+                <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}"
+                        BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 12" Padding="12">
+                    <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" />
+                </Border>
+
+                <!-- Primeira abertura: criar perfil -->
+                <Border IsVisible="{Binding IsFirstTime}" BackgroundColor="White"
+                        StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="20" Margin="0,16,0,0">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Vamos criar seu perfil" FontSize="18" FontAttributes="Bold" TextColor="#0D47A1" />
+                        <Label Text="Os dados ficam só neste aparelho. Faça backup em Config. › Backup dos dados para não perder."
+                               FontSize="12" TextColor="#6E6E6E" />
+
+                        <Label Text="Nome" FontSize="11" TextColor="#6E6E6E" Margin="0,8,0,0" />
+                        <Entry Text="{Binding Name}" Placeholder="Como você quer ser chamado" />
+
+                        <Label Text="E-mail (opcional)" FontSize="11" TextColor="#6E6E6E" />
+                        <Entry Text="{Binding Email}" Placeholder="seuemail@exemplo.com" Keyboard="Email" />
+
+                        <Button Text="Criar meu perfil" Command="{Binding CreateProfileCommand}"
+                                BackgroundColor="#0D47A1" TextColor="White" CornerRadius="12"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBool}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Voltas seguintes: entrar -->
+                <Border IsVisible="{Binding IsFirstTime, Converter={StaticResource InvertBool}}"
+                        BackgroundColor="White" StrokeShape="RoundRectangle 18" Stroke="Transparent"
+                        Padding="20" Margin="0,16,0,0">
+                    <VerticalStackLayout Spacing="12" HorizontalOptions="Fill">
+                        <Label Text="Bem-vindo de volta!" FontSize="18" FontAttributes="Bold" TextColor="#0D47A1" />
+                        <Label FontSize="14" TextColor="#212121">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Entrar como " />
+                                    <Span Text="{Binding SavedName}" FontAttributes="Bold" />
+                                    <Span Text="." />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Button Text="Entrar" Command="{Binding EnterCommand}"
+                                BackgroundColor="#0D47A1" TextColor="White" CornerRadius="12" />
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Label Grid.Row="1" Text="Flaitt Finanças · dados locais" FontSize="10"
+               HorizontalOptions="Center" TextColor="#BBD4F5" Margin="0,0,0,16" />
+    </Grid>
+</ContentPage>
