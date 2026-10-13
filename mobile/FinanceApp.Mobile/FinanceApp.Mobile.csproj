@@ -18,6 +18,17 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
+  <!--
+    EF Core 8 recusa construir o modelo em tempo de execução quando a plataforma não permite "código
+    dinâmico" (AOT puro no iOS físico, por exemplo), e aí quebra com:
+      "Model building is not supported when publishing with NativeAOT. Use a compiled model."
+    Habilitar o interpretador do Mono no iOS resolve, com um pequeno custo de inicialização.
+    Para Release otimizado, considerar gerar um modelo compilado via `dotnet ef dbcontext optimize`.
+  -->
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+    <UseInterpreter>true</UseInterpreter>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <!-- Reconhecimento de voz no dispositivo (sem rede) para o fluxo "ditar o gasto" -->

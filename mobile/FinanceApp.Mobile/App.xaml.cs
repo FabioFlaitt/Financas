@@ -28,10 +28,10 @@ public partial class App : Microsoft.Maui.Controls.Application
                     : new NavigationPage(ServiceHelper.Get<WelcomePage>()) { BarBackgroundColor = Color.FromArgb("#0D47A1") };
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Falha ao abrir o banco: ainda assim entrega as abas; a tela de erro aparece na primeira operação.
-            await MainThread.InvokeOnMainThreadAsync(() => MainPage = new AppShell());
+            // Em vez de "entrar com erro silencioso", mostra a mensagem para o usuário poder relatar.
+            await MainThread.InvokeOnMainThreadAsync(() => MainPage = BuildErrorPage(ex));
         }
     }
 
@@ -47,6 +47,27 @@ public partial class App : Microsoft.Maui.Controls.Application
             {
                 new Label { Text = "Flaitt Finanças", FontSize = 22, FontAttributes = FontAttributes.Bold, TextColor = Colors.White, HorizontalOptions = LayoutOptions.Center },
                 new ActivityIndicator { IsRunning = true, Color = Colors.White }
+            }
+        }
+    };
+
+    private static ContentPage BuildErrorPage(Exception ex) => new()
+    {
+        BackgroundColor = Color.FromArgb("#0D47A1"),
+        Padding = new Thickness(24),
+        Content = new ScrollView
+        {
+            Content = new VerticalStackLayout
+            {
+                Spacing = 12,
+                VerticalOptions = LayoutOptions.Center,
+                Children =
+                {
+                    new Label { Text = "⚠️", FontSize = 48, HorizontalOptions = LayoutOptions.Center },
+                    new Label { Text = "Não foi possível abrir seus dados", FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Colors.White, HorizontalTextAlignment = TextAlignment.Center },
+                    new Label { Text = ex.Message, FontSize = 13, TextColor = Color.FromArgb("#FFCDD2"), HorizontalTextAlignment = TextAlignment.Center },
+                    new Label { Text = ex.GetType().FullName ?? "", FontSize = 11, TextColor = Color.FromArgb("#BBD4F5"), HorizontalTextAlignment = TextAlignment.Center }
+                }
             }
         }
     };
