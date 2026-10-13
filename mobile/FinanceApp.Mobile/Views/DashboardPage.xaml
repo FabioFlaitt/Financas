@@ -40,6 +40,7 @@
         </Style>
     </ContentPage.Resources>
 
+    <Grid>
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
         <ScrollView>
             <VerticalStackLayout Padding="16" Spacing="14">
@@ -228,4 +229,11 @@
             </VerticalStackLayout>
         </ScrollView>
     </RefreshView>
+
+        <!-- Botão flutuante: ditar um gasto por voz -->
+        <Button Text="🎙️" FontSize="26" BackgroundColor="#0D47A1" TextColor="White"
+                WidthRequest="60" HeightRequest="60" CornerRadius="30" Padding="0"
+                HorizontalOptions="End" VerticalOptions="End" Margin="0,0,20,24"
+                Clicked="OnVoiceTapped" />
+    </Grid>
 </ContentPage>

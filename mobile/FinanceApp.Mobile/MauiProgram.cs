@@ -1,3 +1,4 @@
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using FinanceApp.Mobile.Services;
 using FinanceApp.Mobile.ViewModels;
@@ -12,6 +13,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()           // habilita o SpeechToText.Default
             .UseMauiMaps()
             .ConfigureFonts(fonts =>
             {
@@ -23,6 +25,11 @@ public static class MauiProgram
         builder.Services.AddSingleton<LocalFinanceStore>();
         builder.Services.AddSingleton<FinanceApiClient>();
         builder.Services.AddSingleton<LocationService>();
+        builder.Services.AddSingleton<ISpeechToTextService, SpeechToTextService>();
+
+        // --- Ditar lançamento por voz ---
+        builder.Services.AddTransient<VoiceExpenseViewModel>();
+        builder.Services.AddTransient<VoiceExpensePage>();
 
         // --- Painel (aba) ---
         builder.Services.AddSingleton<DashboardViewModel>();

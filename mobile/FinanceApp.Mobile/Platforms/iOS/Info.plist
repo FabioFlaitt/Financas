@@ -34,6 +34,10 @@
 	<string>Usamos o Face ID para proteger o acesso às suas informações financeiras.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Usamos sua localização para mapear a rota, os quilômetros e o mapa da sua viagem.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Usamos o microfone quando você toca em "ditar lançamento" para transcrever a fala em um gasto.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Usamos o reconhecimento de voz para transformar sua fala em um lançamento. Nada é enviado para servidores do app.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>pt-BR</string>
 	<key>CFBundleLocalizations</key>

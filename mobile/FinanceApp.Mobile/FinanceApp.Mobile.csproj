@@ -20,6 +20,8 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <!-- Reconhecimento de voz no dispositivo (sem rede) para o fluxo "ditar o gasto" -->
+    <PackageReference Include="CommunityToolkit.Maui" Version="11.2.0" />
     <!-- Alinhado à versão do workload MAUI para evitar conflito de versões -->
     <PackageReference Include="Microsoft.Maui.Controls.Maps" Version="$(MauiVersion)" />
     <!-- Logging de depuração usado em MauiProgram (builder.Logging.AddDebug) -->
