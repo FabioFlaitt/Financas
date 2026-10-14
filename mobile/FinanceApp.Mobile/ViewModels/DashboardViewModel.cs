@@ -11,13 +11,39 @@ namespace FinanceApp.Mobile.ViewModels;
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly FinanceApiClient _api;
+    private readonly BackupReminderService _backup;
 
-    public DashboardViewModel(FinanceApiClient api)
+    public DashboardViewModel(FinanceApiClient api, BackupReminderService backup)
     {
         _api = api;
+        _backup = backup;
         var now = DateTime.Today;
         _year = now.Year;
         _month = now.Month;
+    }
+
+    [ObservableProperty] private bool _showBackupReminder;
+    [ObservableProperty] private string _backupReminderText = string.Empty;
+
+    public void RefreshBackupReminder()
+    {
+        ShowBackupReminder = _backup.ShouldRemind();
+        BackupReminderText = _backup.LastBackupUtc is DateTime last
+            ? $"Último backup em {last.ToLocalTime():dd/MM/yyyy}. Que tal fazer um novo?"
+            : "Você ainda não fez backup dos seus dados. Guarde uma cópia no iCloud/Drive.";
+    }
+
+    [RelayCommand]
+    private async Task BackupNowAsync()
+    {
+        if (await _backup.BackupNowAsync()) RefreshBackupReminder();
+    }
+
+    [RelayCommand]
+    private void SnoozeBackup()
+    {
+        _backup.SnoozeReminder();
+        ShowBackupReminder = false;
     }
 
     private int _year;
@@ -60,6 +86,7 @@ public partial class DashboardViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+            RefreshBackupReminder();
         }
     }
 

@@ -49,6 +49,7 @@ public static class LocalInfrastructure
         using var scope = provider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.EnsureCreatedAsync(ct);
+        await EnsureLocalColumnsAsync(db, ct);
 
         var users = await db.Users.OrderBy(u => u.CreatedAtUtc).ToListAsync(ct);
         if (users.Count == 1 && users[0].Email == LocalUserEmail && users[0].Name == "Meu perfil")
@@ -71,6 +72,50 @@ public static class LocalInfrastructure
         }
 
         provider.GetRequiredService<LocalCurrentUser>().UserId = users.FirstOrDefault()?.Id;
+    }
+
+    /// <summary>
+    /// Migração aditiva leve para o SQLite local (que usa EnsureCreated, sem migrations): adiciona colunas
+    /// novas em tabelas já existentes, de forma idempotente, para não quebrar instalações antigas.
+    /// </summary>
+    private static async Task EnsureLocalColumnsAsync(AppDbContext db, CancellationToken ct)
+    {
+        var additions = new (string Table, string Column, string Type)[]
+        {
+            ("Trips", "OriginLatitude", "REAL"),
+            ("Trips", "OriginLongitude", "REAL"),
+            ("Trips", "DestinationLatitude", "REAL"),
+            ("Trips", "DestinationLongitude", "REAL"),
+            ("Trips", "IsDeleted", "INTEGER NOT NULL DEFAULT 0"),
+        };
+
+        var conn = db.Database.GetDbConnection();
+        var wasOpen = conn.State == System.Data.ConnectionState.Open;
+        if (!wasOpen) await conn.OpenAsync(ct);
+        try
+        {
+            foreach (var group in additions.GroupBy(a => a.Table))
+            {
+                var existing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                await using (var pragma = conn.CreateCommand())
+                {
+                    pragma.CommandText = $"PRAGMA table_info({group.Key});";
+                    await using var reader = await pragma.ExecuteReaderAsync(ct);
+                    while (await reader.ReadAsync(ct)) existing.Add(reader.GetString(1)); // coluna 1 = name
+                }
+                if (existing.Count == 0) continue; // tabela não existe (nada a migrar)
+
+                foreach (var (table, column, type) in group)
+                {
+                    if (existing.Contains(column)) continue;
+                    await using var alter = conn.CreateCommand();
+                    alter.CommandText = $"ALTER TABLE {table} ADD COLUMN {column} {type};";
+                    await alter.ExecuteNonQueryAsync(ct);
+                }
+            }
+        }
+        catch { /* se falhar, segue; EnsureCreated já cobre instalações novas */ }
+        finally { if (!wasOpen) await conn.CloseAsync(); }
     }
 
     /// <summary>Retorna <c>true</c> se já existe um perfil no banco local.</summary>

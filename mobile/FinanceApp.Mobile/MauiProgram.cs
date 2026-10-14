@@ -30,6 +30,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<IPlaceSearchService, PhotonPlaceSearchService>();
         builder.Services.AddSingleton<SavedPlacesService>();
         builder.Services.AddSingleton<VoiceGuideService>();
+        builder.Services.AddSingleton<BackupReminderService>();
+        builder.Services.AddSingleton<BiometricLockService>();
 
         // --- Boas-vindas / criação do perfil local ---
         builder.Services.AddTransient<WelcomeViewModel>();

@@ -5,11 +5,16 @@ namespace FinanceApp.Mobile.Views;
 public partial class SettingsPage : ContentPage
 {
     private readonly LocalFinanceStore _store;
+    private readonly BackupReminderService _backup;
+    private readonly BiometricLockService _lock;
+    private bool _syncingSwitch;
 
-    public SettingsPage(LocalFinanceStore store)
+    public SettingsPage(LocalFinanceStore store, BackupReminderService backup, BiometricLockService lockService)
     {
         InitializeComponent();
         _store = store;
+        _backup = backup;
+        _lock = lockService;
     }
 
     protected override void OnAppearing()
@@ -18,6 +23,33 @@ public partial class SettingsPage : ContentPage
 
         try { VersionLabel.Text = $"Versão {AppInfo.Current.VersionString}"; }
         catch { /* AppInfo pode não estar disponível em alguns ambientes */ }
+
+        _syncingSwitch = true;
+        BiometricSwitch.IsToggled = _lock.IsEnabled;
+        _syncingSwitch = false;
+    }
+
+    private async void OnBiometricToggled(object? sender, ToggledEventArgs e)
+    {
+        if (_syncingSwitch) return;
+
+        if (e.Value)
+        {
+            if (!await _lock.IsAvailableAsync())
+            {
+                await DisplayAlert("Biometria", "Este aparelho não tem biometria configurada.", "OK");
+                _syncingSwitch = true; BiometricSwitch.IsToggled = false; _syncingSwitch = false;
+                return;
+            }
+            // Confirma com uma autenticação antes de ativar.
+            if (!await _lock.AuthenticateAsync())
+            {
+                _syncingSwitch = true; BiometricSwitch.IsToggled = false; _syncingSwitch = false;
+                return;
+            }
+        }
+
+        _lock.IsEnabled = e.Value;
     }
 
     private Task OpenAsync<TPage>() where TPage : Page
@@ -39,19 +71,8 @@ public partial class SettingsPage : ContentPage
 
     private async void OnBackupTapped(object? sender, EventArgs e)
     {
-        try
-        {
-            var file = await _store.CreateBackupFileAsync();
-            await Share.Default.RequestAsync(new ShareFileRequest
-            {
-                Title = "Backup Flaitt Finanças",
-                File = new ShareFile(file)
-            });
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Backup", "Não foi possível gerar o backup: " + ex.Message, "OK");
-        }
+        if (!await _backup.BackupNowAsync())
+            await DisplayAlert("Backup", "Não foi possível gerar o backup.", "OK");
     }
 
     private async void OnResetTapped(object? sender, EventArgs e)

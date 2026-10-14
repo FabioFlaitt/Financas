@@ -707,6 +707,12 @@ namespace FinanceApp.Infrastructure.Persistence.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<double?>("DestinationLatitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("DestinationLongitude")
+                        .HasColumnType("double precision");
+
                     b.Property<decimal?>("EndOdometerKm")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
@@ -726,6 +732,9 @@ namespace FinanceApp.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -738,6 +747,12 @@ namespace FinanceApp.Infrastructure.Persistence.Migrations
                     b.Property<string>("Origin")
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
+
+                    b.Property<double?>("OriginLatitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("OriginLongitude")
+                        .HasColumnType("double precision");
 
                     b.Property<decimal?>("StartOdometerKm")
                         .HasPrecision(18, 2)

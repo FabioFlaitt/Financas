@@ -213,6 +213,10 @@ public partial class TripStartViewModel : ObservableObject
                 name,
                 origin,
                 destination,
+                originLatitude = _originLocation?.Latitude,
+                originLongitude = _originLocation?.Longitude,
+                destinationLatitude = _destinationLocation?.Latitude,
+                destinationLongitude = _destinationLocation?.Longitude,
                 vehicleName = VehicleName,
                 startOdometerKm = ParseDecimal(StartOdometerText),
                 fuelPricePerLiter = ParseDecimal(FuelPriceText)

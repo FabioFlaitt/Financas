@@ -16,6 +16,15 @@ public class Trip : BaseEntity, IUserOwnedEntity
     public string? Destination { get; set; }
     public string? VehicleName { get; set; }
 
+    /// <summary>Coordenadas de origem/destino escolhidas no planejamento (para re-planejar sem geocodificar de novo).</summary>
+    public double? OriginLatitude { get; set; }
+    public double? OriginLongitude { get; set; }
+    public double? DestinationLatitude { get; set; }
+    public double? DestinationLongitude { get; set; }
+
+    /// <summary>Exclusão lógica: a viagem some da lista mas continua no banco (recuperável).</summary>
+    public bool IsDeleted { get; set; }
+
     public TripStatus Status { get; set; } = TripStatus.InProgress;
 
     public DateTime StartedAtUtc { get; set; } = DateTime.UtcNow;

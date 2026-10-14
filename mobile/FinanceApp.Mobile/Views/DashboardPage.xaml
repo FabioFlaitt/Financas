@@ -44,6 +44,22 @@
         <ScrollView>
             <VerticalStackLayout Padding="16" Spacing="14">
 
+                <!-- Lembrete de backup -->
+                <Border IsVisible="{Binding ShowBackupReminder}" BackgroundColor="#FFF7E6"
+                        Stroke="#F9A825" StrokeShape="RoundRectangle 14" Padding="14">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="🛟 Proteja seus dados" FontAttributes="Bold" FontSize="14" TextColor="#8A6D1A" />
+                        <Label Text="{Binding BackupReminderText}" FontSize="12" TextColor="#8A6D1A" />
+                        <HorizontalStackLayout Spacing="10">
+                            <Button Text="Fazer backup" Command="{Binding BackupNowCommand}"
+                                    BackgroundColor="#0D47A1" TextColor="White" CornerRadius="10" FontSize="13" Padding="14,6" />
+                            <Button Text="Depois" Command="{Binding SnoozeBackupCommand}"
+                                    BackgroundColor="Transparent" TextColor="#8A6D1A" FontSize="13" Padding="10,6" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+
                 <!-- Cabeçalho -->
                 <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                     <VerticalStackLayout>

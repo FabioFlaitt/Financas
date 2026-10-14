@@ -53,6 +53,10 @@ public record TripDetailDto : TripDto
     public decimal? FuelPricePerLiter { get; init; }
     public decimal? FuelEfficiencyKmPerLiter { get; init; }
     public string? Notes { get; init; }
+    public double? OriginLatitude { get; init; }
+    public double? OriginLongitude { get; init; }
+    public double? DestinationLatitude { get; init; }
+    public double? DestinationLongitude { get; init; }
     public IReadOnlyList<TripExpenseDto> Expenses { get; init; } = Array.Empty<TripExpenseDto>();
     public IReadOnlyList<TripLocationDto> Route { get; init; } = Array.Empty<TripLocationDto>();
 }
@@ -63,6 +67,10 @@ public record StartTripRequest
     public string? Origin { get; init; }
     public string? Destination { get; init; }
     public string? VehicleName { get; init; }
+    public double? OriginLatitude { get; init; }
+    public double? OriginLongitude { get; init; }
+    public double? DestinationLatitude { get; init; }
+    public double? DestinationLongitude { get; init; }
     public decimal? StartOdometerKm { get; init; }
     public decimal? FuelPricePerLiter { get; init; }
     public decimal? FuelEfficiencyKmPerLiter { get; init; }

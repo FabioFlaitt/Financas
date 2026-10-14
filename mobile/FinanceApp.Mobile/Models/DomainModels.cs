@@ -138,6 +138,10 @@ public class TripDetailDto : TripDto
     public decimal? FuelPricePerLiter { get; set; }
     public decimal? FuelEfficiencyKmPerLiter { get; set; }
     public string? Notes { get; set; }
+    public double? OriginLatitude { get; set; }
+    public double? OriginLongitude { get; set; }
+    public double? DestinationLatitude { get; set; }
+    public double? DestinationLongitude { get; set; }
     public List<TripExpenseDto> Expenses { get; set; } = new();
     public List<TripLocationDto> Route { get; set; } = new();
 }

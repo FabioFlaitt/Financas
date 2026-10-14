@@ -154,6 +154,21 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Segurança -->
+            <Label Text="SEGURANÇA" Style="{StaticResource GroupTitle}" />
+            <Border StrokeShape="RoundRectangle 14" Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}" Padding="16">
+                <Grid ColumnDefinitions="34,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                    <Label Grid.Column="0" Text="🔒" FontSize="20" VerticalOptions="Center" HorizontalOptions="Center" />
+                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                        <Label Text="Exigir biometria ao abrir" FontSize="15"
+                               TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                        <Label Text="Face ID / Touch ID / digital" FontSize="11" TextColor="#919191" />
+                    </VerticalStackLayout>
+                    <Switch Grid.Column="2" x:Name="BiometricSwitch" Toggled="OnBiometricToggled" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
             <!-- Zona crítica -->
             <Label Text="ZONA CRÍTICA" Style="{StaticResource GroupTitle}" />
             <Border StrokeShape="RoundRectangle 14" Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}" Padding="0">

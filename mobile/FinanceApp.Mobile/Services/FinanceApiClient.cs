@@ -198,6 +198,15 @@ public class FinanceApiClient
     public Task DeleteTripAsync(Guid id, CancellationToken ct = default)
         => Using<Trp.ITripService>().Run(s => s.DeleteAsync(id, ct));
 
+    public Task SoftDeleteTripAsync(Guid id, CancellationToken ct = default)
+        => Using<Trp.ITripService>().Run(s => s.SoftDeleteAsync(id, ct));
+
+    public Task RestoreTripAsync(Guid id, CancellationToken ct = default)
+        => Using<Trp.ITripService>().Run(s => s.RestoreAsync(id, ct));
+
+    public Task<List<TripDto>> ListDeletedTripsAsync(CancellationToken ct = default)
+        => Using<Trp.ITripService>().Run(async s => Map<List<TripDto>>(await s.ListDeletedAsync(ct)));
+
     public Task<TripExpenseDto> AddTripExpenseAsync(Guid tripId, object body, CancellationToken ct = default)
         => Using<Trp.ITripService>().Run(async s => Map<TripExpenseDto>(await s.AddExpenseAsync(tripId, Map<Trp.AddTripExpenseRequest>(body), ct)));
 

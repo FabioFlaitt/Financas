@@ -5,11 +5,12 @@
              xmlns:models="clr-namespace:FinanceApp.Mobile.Models"
              x:Class="FinanceApp.Mobile.Views.TripsPage"
              x:DataType="vm:TripsViewModel"
-             Title="Viagens"
+             Title="{Binding Title}"
              BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Nova viagem" Clicked="OnNewClicked" />
+        <ToolbarItem Text="Excluídas" Clicked="OnToggleDeleted" />
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto,*">
@@ -35,7 +36,7 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnTripTapped" />
                             </Border.GestureRecognizers>
-                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="6">
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto,Auto" RowSpacing="6" ColumnSpacing="6">
                                 <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="2">
                                     <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold"
                                            TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
@@ -46,7 +47,10 @@
                                 <Label Grid.Row="0" Grid.Column="1" VerticalOptions="Center"
                                        Text="{Binding Summary.TotalCost, Converter={StaticResource Currency}}"
                                        FontAttributes="Bold" TextColor="#0D47A1" />
-                                <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2" Spacing="16">
+                                <Button Grid.Row="0" Grid.Column="2" Text="⋮" FontSize="20" Padding="0" WidthRequest="36" HeightRequest="36"
+                                        BackgroundColor="Transparent" TextColor="#6E6E6E" VerticalOptions="Center"
+                                        Clicked="OnTripMenu" CommandParameter="{Binding .}" />
+                                <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="3" Spacing="16">
                                     <Label FontSize="12" TextColor="#6E6E6E"
                                            Text="{Binding Summary.DistanceKm, StringFormat='{0:N1} km'}" />
                                     <Label FontSize="12" TextColor="#6E6E6E"

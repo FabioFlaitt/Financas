@@ -16,6 +16,9 @@ public interface ITripService
     Task<TripDetailDto> FinishAsync(Guid id, FinishTripRequest request, CancellationToken ct = default);
     Task<TripDetailDto> CancelAsync(Guid id, CancellationToken ct = default);
     Task DeleteAsync(Guid id, CancellationToken ct = default);
+    Task SoftDeleteAsync(Guid id, CancellationToken ct = default);
+    Task RestoreAsync(Guid id, CancellationToken ct = default);
+    Task<IReadOnlyList<TripDto>> ListDeletedAsync(CancellationToken ct = default);
 
     Task<TripExpenseDto> AddExpenseAsync(Guid tripId, AddTripExpenseRequest request, CancellationToken ct = default);
     Task<TripExpenseDto> UpdateExpenseAsync(Guid tripId, Guid expenseId, UpdateTripExpenseRequest request, CancellationToken ct = default);
@@ -40,8 +43,14 @@ public class TripService : ITripService
     private Guid UserId => _currentUser.UserId ?? throw new InvalidOperationException("Usuário não autenticado.");
 
     public async Task<IReadOnlyList<TripDto>> ListAsync(CancellationToken ct = default)
+        => await ListInternalAsync(deleted: false, ct);
+
+    public async Task<IReadOnlyList<TripDto>> ListDeletedAsync(CancellationToken ct = default)
+        => await ListInternalAsync(deleted: true, ct);
+
+    private async Task<IReadOnlyList<TripDto>> ListInternalAsync(bool deleted, CancellationToken ct)
     {
-        var trips = await _db.Trips.Where(t => t.UserId == UserId).ToListAsync(ct);
+        var trips = await _db.Trips.Where(t => t.UserId == UserId && t.IsDeleted == deleted).ToListAsync(ct);
         var expenses = await _db.TripExpenses.Where(e => e.UserId == UserId).ToListAsync(ct);
         var byTrip = expenses.GroupBy(e => e.TripId).ToDictionary(g => g.Key, g => g.ToList());
 
@@ -71,6 +80,10 @@ public class TripService : ITripService
             Origin = request.Origin?.Trim(),
             Destination = request.Destination?.Trim(),
             VehicleName = request.VehicleName?.Trim(),
+            OriginLatitude = request.OriginLatitude,
+            OriginLongitude = request.OriginLongitude,
+            DestinationLatitude = request.DestinationLatitude,
+            DestinationLongitude = request.DestinationLongitude,
             Status = TripStatus.InProgress,
             StartedAtUtc = _clock.UtcNow,
             StartOdometerKm = request.StartOdometerKm,
@@ -128,6 +141,22 @@ public class TripService : ITripService
     {
         var trip = await LoadAsync(id, ct);
         _db.Trips.Remove(trip);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task SoftDeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        var trip = await LoadAsync(id, ct);
+        trip.IsDeleted = true;
+        trip.UpdatedAtUtc = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task RestoreAsync(Guid id, CancellationToken ct = default)
+    {
+        var trip = await LoadAsync(id, ct);
+        trip.IsDeleted = false;
+        trip.UpdatedAtUtc = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
     }
 
@@ -296,6 +325,10 @@ public class TripService : ITripService
         FuelPricePerLiter = trip.FuelPricePerLiter,
         FuelEfficiencyKmPerLiter = trip.FuelEfficiencyKmPerLiter,
         Notes = trip.Notes,
+        OriginLatitude = trip.OriginLatitude,
+        OriginLongitude = trip.OriginLongitude,
+        DestinationLatitude = trip.DestinationLatitude,
+        DestinationLongitude = trip.DestinationLongitude,
         Expenses = expenses.Select(ToExpenseDto).ToList(),
         Route = route.Select(p => new TripLocationDto(p.Latitude, p.Longitude, p.RecordedAtUtc, p.SpeedKmh)).ToList()
     };

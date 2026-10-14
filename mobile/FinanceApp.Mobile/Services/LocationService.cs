@@ -1,17 +1,25 @@
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices.Sensors;
+#if IOS
+using CoreLocation;
+#endif
 
 namespace FinanceApp.Mobile.Services;
 
 /// <summary>
-/// Encapsula o GPS do dispositivo (MAUI Geolocation). Pede permissão de localização,
-/// obtém a posição atual e transmite atualizações ao vivo enquanto o app está em primeiro plano.
+/// Encapsula o GPS do dispositivo. No iOS usa o CLLocationManager nativo com atualizações em segundo
+/// plano (necessário para detectar pedágios com a tela bloqueada); nas demais plataformas usa o
+/// MAUI Geolocation em primeiro plano.
 /// </summary>
 public class LocationService
 {
     private bool _listening;
 
     public event EventHandler<Location>? LocationChanged;
+
+#if IOS
+    private CLLocationManager? _clManager;
+#endif
 
     public async Task<bool> EnsurePermissionAsync()
     {
@@ -61,6 +69,9 @@ public class LocationService
         if (_listening) return true;
         if (!await EnsurePermissionAsync()) return false;
 
+#if IOS
+        return StartIosBackground();
+#else
         try
         {
             Geolocation.Default.LocationChanged += OnLocationChanged;
@@ -74,16 +85,58 @@ public class LocationService
             Geolocation.Default.LocationChanged -= OnLocationChanged;
             return false;
         }
+#endif
     }
 
     public void Stop()
     {
         if (!_listening) return;
+#if IOS
+        try { _clManager?.StopUpdatingLocation(); } catch { }
+        _clManager = null;
+#else
         try { Geolocation.Default.StopListeningForeground(); } catch { }
         Geolocation.Default.LocationChanged -= OnLocationChanged;
+#endif
         _listening = false;
     }
 
+#if IOS
+    /// <summary>GPS nativo do iOS com atualização contínua em segundo plano (tela bloqueada).</summary>
+    private bool StartIosBackground()
+    {
+        try
+        {
+            _clManager = new CLLocationManager
+            {
+                DesiredAccuracy = CLLocation.AccuracyBestForNavigation,
+                DistanceFilter = 10,
+                AllowsBackgroundLocationUpdates = true,
+                PausesLocationUpdatesAutomatically = false,
+                ShowsBackgroundLocationIndicator = true
+            };
+            _clManager.LocationsUpdated += (_, e) =>
+            {
+                var last = e.Locations.LastOrDefault();
+                if (last is null) return;
+                LocationChanged?.Invoke(this, new Location(last.Coordinate.Latitude, last.Coordinate.Longitude)
+                {
+                    Speed = last.Speed >= 0 ? last.Speed : null
+                });
+            };
+            _clManager.RequestAlwaysAuthorization();
+            _clManager.StartUpdatingLocation();
+            _listening = true;
+            return true;
+        }
+        catch
+        {
+            _clManager = null;
+            return false;
+        }
+    }
+#else
     private void OnLocationChanged(object? sender, GeolocationLocationChangedEventArgs e)
         => LocationChanged?.Invoke(this, e.Location);
+#endif
 }

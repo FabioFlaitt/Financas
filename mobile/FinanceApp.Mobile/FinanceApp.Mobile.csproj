@@ -39,6 +39,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
     <!-- SQLite nativo mais recente (EF Core 8 traz 2.1.6, sem alinhamento de 16 KB exigido pelo Android 16) -->
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.11" />
+    <!-- Biometria (Face ID no iOS, digital no Android) para a trava de abertura -->
+    <PackageReference Include="Plugin.Fingerprint" Version="2.1.5" />
   </ItemGroup>
 
   <ItemGroup>

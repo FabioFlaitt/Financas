@@ -111,12 +111,16 @@ public partial class TripDetailViewModel : ObservableObject
     private async Task PlanRouteAsync()
     {
         if (Trip is null) return;
-        if (string.IsNullOrWhiteSpace(Trip.Origin) || string.IsNullOrWhiteSpace(Trip.Destination)) return;
 
         try
         {
-            var origin = await GeocodeAsync(Trip.Origin!);
-            var destination = await GeocodeAsync(Trip.Destination!);
+            // Prefere as coordenadas salvas na viagem (sem geocodificar de novo); cai para o texto se faltar.
+            var origin = Trip.OriginLatitude is double olat && Trip.OriginLongitude is double olng
+                ? new Location(olat, olng)
+                : string.IsNullOrWhiteSpace(Trip.Origin) ? null : await GeocodeAsync(Trip.Origin!);
+            var destination = Trip.DestinationLatitude is double dlat && Trip.DestinationLongitude is double dlng
+                ? new Location(dlat, dlng)
+                : string.IsNullOrWhiteSpace(Trip.Destination) ? null : await GeocodeAsync(Trip.Destination!);
             if (origin is null || destination is null) return;
 
             _destination = destination;
@@ -134,7 +138,14 @@ public partial class TripDetailViewModel : ObservableObject
 
         _plannedTolls.Clear();
         foreach (var t in plan.Tolls)
-            _plannedTolls.Add(new PlannedTollState { Toll = t });
+        {
+            // Se já existe um pedágio registrado perto deste ponto (ex.: app reiniciou no meio da viagem),
+            // marca como disparado para não registrar de novo.
+            var already = Trip?.Expenses.Any(e => e.Type == TripExpenseType.Toll
+                && e.Latitude is double la && e.Longitude is double lo
+                && FinanceApp.Application.Trips.TripService.HaversineKm(la, lo, t.Latitude, t.Longitude) <= TollGeofenceKm) ?? false;
+            _plannedTolls.Add(new PlannedTollState { Toll = t, Triggered = already });
+        }
 
         _navSteps.Clear();
         _navSteps.AddRange(plan.Steps);
