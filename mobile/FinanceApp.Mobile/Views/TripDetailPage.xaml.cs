@@ -118,6 +118,12 @@ public partial class TripDetailPage : ContentPage
         }
     }
 
+    private void OnToggleVoice(object? sender, EventArgs e)
+    {
+        _vm.ToggleVoice();
+        VoiceButton.Text = _vm.VoiceEnabled ? "🔊 Voz: ligada" : "🔇 Voz: desligada";
+    }
+
     private async void OnAddToll(object? sender, EventArgs e)
     {
         var input = await DisplayPromptAsync("Pedágio", "Valor do pedágio (R$):", "Registrar", "Cancelar",

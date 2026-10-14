@@ -27,32 +27,96 @@ public sealed class OsmRoutingService : IRoutingService
 
     public async Task<PlannedRoute?> PlanAsync(Location origin, Location destination, CancellationToken ct = default)
     {
-        var path = await GetRouteAsync(origin, destination, ct);
+        var (path, steps) = await GetRouteAsync(origin, destination, ct);
         if (path.Count < 2) return null;
 
         var tolls = await GetTollsAsync(path, ct);
-        return new PlannedRoute(path, tolls);
+        return new PlannedRoute(path, tolls, steps);
     }
 
     // ---- rota (OSRM) ----
 
-    private async Task<List<Location>> GetRouteAsync(Location origin, Location destination, CancellationToken ct)
+    private async Task<(List<Location> Path, List<NavStep> Steps)> GetRouteAsync(Location origin, Location destination, CancellationToken ct)
     {
         try
         {
-            var url = $"{OsrmUrl}{Inv(origin.Longitude)},{Inv(origin.Latitude)};{Inv(destination.Longitude)},{Inv(destination.Latitude)}?overview=full&geometries=polyline";
+            var url = $"{OsrmUrl}{Inv(origin.Longitude)},{Inv(origin.Latitude)};{Inv(destination.Longitude)},{Inv(destination.Latitude)}?overview=full&geometries=polyline&steps=true";
             using var response = await _http.GetAsync(url, ct);
-            if (!response.IsSuccessStatusCode) return new();
+            if (!response.IsSuccessStatusCode) return (new(), new());
 
             await using var stream = await response.Content.ReadAsStreamAsync(ct);
             using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
             if (!doc.RootElement.TryGetProperty("routes", out var routes) || routes.GetArrayLength() == 0)
-                return new();
+                return (new(), new());
 
-            var geometry = routes[0].TryGetProperty("geometry", out var g) ? g.GetString() : null;
-            return string.IsNullOrEmpty(geometry) ? new() : DecodePolyline(geometry!);
+            var route = routes[0];
+            var geometry = route.TryGetProperty("geometry", out var g) ? g.GetString() : null;
+            var path = string.IsNullOrEmpty(geometry) ? new List<Location>() : DecodePolyline(geometry!);
+
+            return (path, ParseSteps(route));
         }
-        catch { return new(); }
+        catch { return (new(), new()); }
+    }
+
+    private static List<NavStep> ParseSteps(JsonElement route)
+    {
+        var steps = new List<NavStep>();
+        if (!route.TryGetProperty("legs", out var legs)) return steps;
+
+        foreach (var leg in legs.EnumerateArray())
+        {
+            if (!leg.TryGetProperty("steps", out var legSteps)) continue;
+            foreach (var step in legSteps.EnumerateArray())
+            {
+                if (!step.TryGetProperty("maneuver", out var m)) continue;
+                if (!m.TryGetProperty("location", out var loc) || loc.GetArrayLength() < 2) continue;
+
+                double lng = loc[0].GetDouble(), lat = loc[1].GetDouble();
+                var type = m.TryGetProperty("type", out var t) ? t.GetString() : null;
+                var modifier = m.TryGetProperty("modifier", out var mod) ? mod.GetString() : null;
+                var name = step.TryGetProperty("name", out var n) ? n.GetString() : null;
+
+                var instruction = BuildInstruction(type, modifier, name);
+                if (!string.IsNullOrEmpty(instruction))
+                    steps.Add(new NavStep(lat, lng, instruction));
+            }
+        }
+        return steps;
+    }
+
+    /// <summary>Monta a instrução falada em português a partir da manobra estruturada do OSRM.</summary>
+    private static string BuildInstruction(string? type, string? modifier, string? name)
+    {
+        var onStreet = string.IsNullOrWhiteSpace(name) ? string.Empty : $" na {name}";
+        var dir = modifier switch
+        {
+            "right" => "à direita",
+            "left" => "à esquerda",
+            "slight right" => "levemente à direita",
+            "slight left" => "levemente à esquerda",
+            "sharp right" => "acentuadamente à direita",
+            "sharp left" => "acentuadamente à esquerda",
+            "straight" => "em frente",
+            "uturn" => "e retorne",
+            _ => ""
+        };
+
+        return type switch
+        {
+            "depart" => string.IsNullOrWhiteSpace(name) ? "Siga em frente" : $"Siga pela {name}",
+            "turn" => $"Vire {dir}{onStreet}".Trim(),
+            "continue" => $"Continue {dir}".Trim(),
+            "new name" => string.IsNullOrWhiteSpace(name) ? "Continue em frente" : $"Continue pela {name}",
+            "merge" => $"Entre {dir}{onStreet}".Trim(),
+            "on ramp" => $"Pegue o acesso {dir}".Trim(),
+            "off ramp" => $"Pegue a saída {dir}".Trim(),
+            "fork" => $"Mantenha-se {dir}".Trim(),
+            "end of road" => $"No fim da via, vire {dir}".Trim(),
+            "roundabout" or "rotary" or "roundabout turn" => "Entre na rotatória",
+            "exit roundabout" or "exit rotary" => "Saia da rotatória",
+            "arrive" => "Você chegou ao destino",
+            _ => string.IsNullOrEmpty(dir) ? "" : $"Vire {dir}{onStreet}".Trim()
+        };
     }
 
     // ---- pedágios (Overpass + tabela ANTT) ----

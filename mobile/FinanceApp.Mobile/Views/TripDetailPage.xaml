@@ -21,6 +21,16 @@
                     <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" FontSize="12" />
                 </Border>
 
+                <!-- Próxima manobra (navegação falada) -->
+                <Border IsVisible="{Binding CurrentInstruction, Converter={StaticResource IsNotNull}}"
+                        BackgroundColor="#0D47A1" StrokeShape="RoundRectangle 12" Padding="14,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Grid.Column="0" Text="🧭" FontSize="22" VerticalOptions="Center" />
+                        <Label Grid.Column="1" Text="{Binding CurrentInstruction}" FontSize="16" FontAttributes="Bold"
+                               TextColor="White" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
                 <!-- Resumo -->
                 <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                     <VerticalStackLayout Grid.Row="0" Grid.Column="0">
@@ -58,6 +68,9 @@
                 <VerticalStackLayout Spacing="8" IsVisible="{Binding IsInProgress}">
                     <Button x:Name="TrackButton" Text="▶ Rastrear rota (GPS)" Clicked="OnToggleTracking"
                             BackgroundColor="#1B5E20" TextColor="White" CornerRadius="12" />
+                    <Button x:Name="VoiceButton" Text="🔊 Voz: ligada" Clicked="OnToggleVoice"
+                            BackgroundColor="Transparent" TextColor="#0D47A1" BorderColor="#0D47A1"
+                            BorderWidth="1" CornerRadius="12" />
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                         <Button Grid.Column="0" Text="Pedágio" Clicked="OnAddToll"
                                 BackgroundColor="#0D47A1" TextColor="White" CornerRadius="12" />

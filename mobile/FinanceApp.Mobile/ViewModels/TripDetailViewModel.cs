@@ -10,27 +10,34 @@ namespace FinanceApp.Mobile.ViewModels;
 
 public partial class TripDetailViewModel : ObservableObject
 {
-    private const double TollGeofenceKm = 0.15; // dispara o registro ao chegar a ~150 m do pedágio
+    private const double TollGeofenceKm = 0.15;     // dispara o registro ao chegar a ~150 m do pedágio
+    private const double TollPreAlertKm = 0.6;       // avisa por voz ao chegar a ~600 m do pedágio
+    private const double TurnAnnounceKm = 0.2;       // fala a manobra ao chegar a ~200 m dela
 
     private readonly FinanceApiClient _api;
     private readonly LocationService _location;
     private readonly IRoutingService _routing;
+    private readonly VoiceGuideService _voice;
     private Guid _tripId;
     private bool _posting;
     private readonly List<PlannedTollState> _plannedTolls = new();
+    private readonly List<NavStep> _navSteps = new();
+    private int _nextStepIndex;
 
-    public TripDetailViewModel(FinanceApiClient api, LocationService location, IRoutingService routing)
+    public TripDetailViewModel(FinanceApiClient api, LocationService location, IRoutingService routing, VoiceGuideService voice)
     {
         _api = api;
         _location = location;
         _routing = routing;
+        _voice = voice;
         _location.LocationChanged += OnLocationChanged;
     }
 
-    /// <summary>Pedágio previsto + se já foi registrado automaticamente nesta sessão.</summary>
+    /// <summary>Pedágio previsto + se já foi avisado/registrado automaticamente nesta sessão.</summary>
     private sealed class PlannedTollState
     {
         public required PlannedToll Toll { get; init; }
+        public bool PreAnnounced { get; set; }
         public bool Triggered { get; set; }
     }
 
@@ -47,6 +54,8 @@ public partial class TripDetailViewModel : ObservableObject
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private bool _isTracking;
     [ObservableProperty] private bool _hasExpenses;
+    [ObservableProperty] private bool _voiceEnabled = true;
+    [ObservableProperty] private string? _currentInstruction;
     [ObservableProperty] private string _tripName = "Viagem";
     [ObservableProperty] private string _statusLabel = string.Empty;
     [ObservableProperty] private bool _isInProgress;
@@ -109,6 +118,11 @@ public partial class TripDetailViewModel : ObservableObject
             foreach (var t in plan.Tolls)
                 _plannedTolls.Add(new PlannedTollState { Toll = t });
 
+            _navSteps.Clear();
+            _navSteps.AddRange(plan.Steps);
+            _nextStepIndex = 0;
+
+            await _voice.EnsureLocaleAsync();
             RoutePlanned?.Invoke(plan);
         }
         catch { /* planejamento é um bônus; falha não impede rastrear a viagem */ }
@@ -142,7 +156,15 @@ public partial class TripDetailViewModel : ObservableObject
     public void StopTracking()
     {
         _location.Stop();
+        _voice.Stop();
         IsTracking = false;
+    }
+
+    /// <summary>Liga/desliga a narração por voz. Ao desligar, interrompe a fala atual.</summary>
+    public void ToggleVoice()
+    {
+        VoiceEnabled = !VoiceEnabled;
+        if (!VoiceEnabled) _voice.Stop();
     }
 
     public async Task<bool> AddTollAsync(decimal amount)
@@ -181,9 +203,24 @@ public partial class TripDetailViewModel : ObservableObject
         catch (Exception ex) { ErrorMessage = ex.Message; return false; }
     }
 
+    /// <summary>Fala a próxima manobra da rota (ex.: "Vire à direita") ao se aproximar dela.</summary>
+    private void AnnounceNextTurn(Location loc)
+    {
+        if (!VoiceEnabled || _nextStepIndex >= _navSteps.Count) return;
+
+        var step = _navSteps[_nextStepIndex];
+        var distance = FinanceApp.Application.Trips.TripService.HaversineKm(
+            loc.Latitude, loc.Longitude, step.Latitude, step.Longitude);
+        if (distance > TurnAnnounceKm) return;
+
+        _nextStepIndex++;
+        CurrentInstruction = step.Instruction;
+        _voice.Speak(step.Instruction);
+    }
+
     /// <summary>
-    /// A cada ponto de GPS, registra automaticamente (sem perguntar) os pedágios previstos a ~150 m.
-    /// Marca cada um como disparado para não duplicar.
+    /// A cada ponto de GPS, avisa por voz a aproximação do pedágio e o registra automaticamente
+    /// (sem perguntar) ao chegar a ~150 m. Marca cada um para não repetir.
     /// </summary>
     private async Task CheckTollGeofencesAsync(Location loc)
     {
@@ -194,10 +231,23 @@ public partial class TripDetailViewModel : ObservableObject
             if (state.Triggered) continue;
             var distance = FinanceApp.Application.Trips.TripService.HaversineKm(
                 loc.Latitude, loc.Longitude, state.Toll.Latitude, state.Toll.Longitude);
+
+            if (!state.PreAnnounced && distance <= TollPreAlertKm)
+            {
+                state.PreAnnounced = true;
+                if (VoiceEnabled)
+                {
+                    var valor = state.Toll.Price > 0
+                        ? $", valor {state.Toll.Price.ToString("C2", BrazilCulture.PtBr)}"
+                        : string.Empty;
+                    _voice.Speak($"Pedágio próximo{valor}.");
+                }
+            }
+
             if (distance > TollGeofenceKm) continue;
 
             state.Triggered = true; // marca antes de aguardar, evita registro duplicado
-            await AddExpenseAsync(new
+            var ok = await AddExpenseAsync(new
             {
                 type = TripExpenseType.Toll,
                 amount = state.Toll.Price,
@@ -205,6 +255,13 @@ public partial class TripDetailViewModel : ObservableObject
                 latitude = state.Toll.Latitude,
                 longitude = state.Toll.Longitude
             });
+            if (ok && VoiceEnabled)
+            {
+                var valor = state.Toll.Price > 0
+                    ? $" de {state.Toll.Price.ToString("C2", BrazilCulture.PtBr)}"
+                    : string.Empty;
+                _voice.Speak($"Pedágio{valor} registrado.");
+            }
         }
     }
 
@@ -265,6 +322,7 @@ public partial class TripDetailViewModel : ObservableObject
         RoutePointAdded?.Invoke(loc.Latitude, loc.Longitude);
         RequestCenter?.Invoke(loc.Latitude, loc.Longitude);
 
+        AnnounceNextTurn(loc);
         await CheckTollGeofencesAsync(loc);
 
         if (_posting) return; // evita chamadas sobrepostas

@@ -5,8 +5,11 @@ namespace FinanceApp.Mobile.Services;
 /// <summary>Um pedágio previsto na rota: onde fica e quanto custa.</summary>
 public record PlannedToll(string Name, double Latitude, double Longitude, decimal Price);
 
-/// <summary>Resultado do planejamento: o traçado da rota (para desenhar) e os pedágios previstos.</summary>
-public record PlannedRoute(IReadOnlyList<Location> Path, IReadOnlyList<PlannedToll> Tolls);
+/// <summary>Uma manobra da rota (ex.: "Vire à direita") e onde ela acontece, para falar na hora certa.</summary>
+public record NavStep(double Latitude, double Longitude, string Instruction);
+
+/// <summary>Resultado do planejamento: o traçado da rota (para desenhar), os pedágios e as manobras.</summary>
+public record PlannedRoute(IReadOnlyList<Location> Path, IReadOnlyList<PlannedToll> Tolls, IReadOnlyList<NavStep> Steps);
 
 /// <summary>
 /// Calcula a rota entre dois pontos e os pedágios no caminho (com preço). Isolado atrás da interface
