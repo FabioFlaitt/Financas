@@ -13,6 +13,9 @@ public partial class TripDetailViewModel : ObservableObject
     private const double TollGeofenceKm = 0.15;     // dispara o registro ao chegar a ~150 m do pedágio
     private const double TollPreAlertKm = 0.6;       // avisa por voz ao chegar a ~600 m do pedágio
     private const double TurnAnnounceKm = 0.2;       // fala a manobra ao chegar a ~200 m dela
+    private const double OffRouteKm = 0.07;          // considera "fora da rota" além de ~70 m do traçado
+    private const int OffRoutePointsToReRoute = 3;   // pontos seguidos fora da rota antes de recalcular
+    private const double MinSecondsBetweenReRoutes = 15;
 
     private readonly FinanceApiClient _api;
     private readonly LocationService _location;
@@ -23,6 +26,11 @@ public partial class TripDetailViewModel : ObservableObject
     private readonly List<PlannedTollState> _plannedTolls = new();
     private readonly List<NavStep> _navSteps = new();
     private int _nextStepIndex;
+    private readonly List<Location> _plannedPath = new();
+    private Location? _destination;
+    private bool _replanning;
+    private int _offRouteCount;
+    private DateTime _lastReRouteUtc = DateTime.MinValue;
 
     public TripDetailViewModel(FinanceApiClient api, LocationService location, IRoutingService routing, VoiceGuideService voice)
     {
@@ -111,21 +119,65 @@ public partial class TripDetailViewModel : ObservableObject
             var destination = await GeocodeAsync(Trip.Destination!);
             if (origin is null || destination is null) return;
 
-            var plan = await _routing.PlanAsync(origin, destination);
-            if (plan is null) return;
-
-            _plannedTolls.Clear();
-            foreach (var t in plan.Tolls)
-                _plannedTolls.Add(new PlannedTollState { Toll = t });
-
-            _navSteps.Clear();
-            _navSteps.AddRange(plan.Steps);
-            _nextStepIndex = 0;
-
+            _destination = destination;
             await _voice.EnsureLocaleAsync();
-            RoutePlanned?.Invoke(plan);
+            await ApplyPlanAsync(origin, destination);
         }
         catch { /* planejamento é um bônus; falha não impede rastrear a viagem */ }
+    }
+
+    /// <summary>Consulta a rota e atualiza traçado, pedágios e manobras. Usado no plano inicial e no recálculo.</summary>
+    private async Task ApplyPlanAsync(Location origin, Location destination)
+    {
+        var plan = await _routing.PlanAsync(origin, destination);
+        if (plan is null) return;
+
+        _plannedTolls.Clear();
+        foreach (var t in plan.Tolls)
+            _plannedTolls.Add(new PlannedTollState { Toll = t });
+
+        _navSteps.Clear();
+        _navSteps.AddRange(plan.Steps);
+        _nextStepIndex = 0;
+
+        _plannedPath.Clear();
+        _plannedPath.AddRange(plan.Path);
+        _offRouteCount = 0;
+
+        RoutePlanned?.Invoke(plan);
+    }
+
+    /// <summary>Recalcula a rota a partir da posição atual quando o motorista sai do traçado por alguns pontos.</summary>
+    private async Task CheckReRouteAsync(Location loc)
+    {
+        if (_destination is null || _plannedPath.Count < 2 || _replanning) return;
+
+        if (MinDistanceToPathKm(loc) <= OffRouteKm) { _offRouteCount = 0; return; }
+
+        _offRouteCount++;
+        if (_offRouteCount < OffRoutePointsToReRoute) return;
+        if ((DateTime.UtcNow - _lastReRouteUtc).TotalSeconds < MinSecondsBetweenReRoutes) return;
+
+        _replanning = true;
+        _lastReRouteUtc = DateTime.UtcNow;
+        try
+        {
+            if (VoiceEnabled) _voice.Speak("Recalculando a rota.");
+            await ApplyPlanAsync(loc, _destination);
+        }
+        catch { /* mantém a rota anterior se o recálculo falhar */ }
+        finally { _replanning = false; }
+    }
+
+    private double MinDistanceToPathKm(Location loc)
+    {
+        double min = double.MaxValue;
+        foreach (var p in _plannedPath)
+        {
+            var km = FinanceApp.Application.Trips.TripService.HaversineKm(loc.Latitude, loc.Longitude, p.Latitude, p.Longitude);
+            if (km < min) min = km;
+        }
+        return min;
     }
 
     private static async Task<Location?> GeocodeAsync(string address)
@@ -322,6 +374,7 @@ public partial class TripDetailViewModel : ObservableObject
         RoutePointAdded?.Invoke(loc.Latitude, loc.Longitude);
         RequestCenter?.Invoke(loc.Latitude, loc.Longitude);
 
+        await CheckReRouteAsync(loc);
         AnnounceNextTurn(loc);
         await CheckTollGeofencesAsync(loc);
 

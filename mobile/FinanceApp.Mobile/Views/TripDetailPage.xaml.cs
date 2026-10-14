@@ -14,6 +14,7 @@ public partial class TripDetailPage : ContentPage
     private Polyline? _route;
     private Polyline? _plannedRoute;
     private bool _centeredOnce;
+    private bool _plannedOnce;
 
     public TripDetailPage(TripDetailViewModel vm)
     {
@@ -58,12 +59,20 @@ public partial class TripDetailPage : ContentPage
         {
             // Rota planejada em laranja (o trajeto real continua em azul).
             if (_plannedRoute is not null) TripMap.MapElements.Remove(_plannedRoute);
+            TripMap.Pins.Clear(); // limpa os pinos de pedágio do plano anterior (recálculo)
+
             if (plan.Path.Count > 1)
             {
                 _plannedRoute = new Polyline { StrokeColor = Color.FromArgb("#EF6C00"), StrokeWidth = 4 };
                 foreach (var p in plan.Path) _plannedRoute.Geopath.Add(p);
                 TripMap.MapElements.Add(_plannedRoute);
-                TripMap.MoveToRegion(MapSpan.FromCenterAndRadius(plan.Path[plan.Path.Count / 2], Distance.FromKilometers(20)));
+
+                // Enquadra a rota só no primeiro plano; nos recálculos segue centrado no motorista.
+                if (!_plannedOnce)
+                {
+                    TripMap.MoveToRegion(MapSpan.FromCenterAndRadius(plan.Path[plan.Path.Count / 2], Distance.FromKilometers(20)));
+                    _plannedOnce = true;
+                }
             }
 
             foreach (var toll in plan.Tolls)

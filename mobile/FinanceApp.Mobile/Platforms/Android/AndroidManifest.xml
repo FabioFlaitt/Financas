@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true"></application>
+	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true">
+		<!--
+			Mapa das viagens (Google Maps SDK). No Android o controle de mapa EXIGE uma chave; sem o
+			meta-data abaixo, o app quebra ao abrir a viagem. Substitua o valor pela sua chave do
+			Google Maps para Android (console.cloud.google.com). No iOS o MapKit não precisa de chave.
+		-->
+		<meta-data android:name="com.google.android.geo.API_KEY" android:value="COLOQUE_SUA_CHAVE_GOOGLE_MAPS_AQUI" />
+	</application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<!-- Reconhecimento de voz no aparelho para o fluxo "ditar o gasto" -->
 	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<!-- Localização para rastrear a viagem, detectar pedágios e navegar (inclui segundo plano) -->
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 	<queries>
 		<intent>
 			<action android:name="android.speech.RecognitionService" />
