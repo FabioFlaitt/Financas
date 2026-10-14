@@ -10,13 +10,10 @@ public record PlannedRoute(IReadOnlyList<Location> Path, IReadOnlyList<PlannedTo
 
 /// <summary>
 /// Calcula a rota entre dois pontos e os pedágios no caminho (com preço). Isolado atrás da interface
-/// para que o resto do app não dependa do provedor (hoje TollGuru).
+/// para que o resto do app não dependa do provedor (hoje OpenStreetMap: OSRM + Overpass, grátis e sem chave).
 /// </summary>
 public interface IRoutingService
 {
-    /// <summary>true quando há chave de API configurada — sem ela o planejamento não funciona.</summary>
-    Task<bool> IsConfiguredAsync();
-
-    /// <summary>Planeja a rota. Devolve null se não houver chave ou o provedor não responder.</summary>
+    /// <summary>Planeja a rota. Devolve null se os provedores não responderem.</summary>
     Task<PlannedRoute?> PlanAsync(Location origin, Location destination, CancellationToken ct = default);
 }

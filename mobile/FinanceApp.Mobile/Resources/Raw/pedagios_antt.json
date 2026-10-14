@@ -1,0 +1,13 @@
+{
+  "nota": "Tarifas aproximadas de pedágio (veículo de passeio, 2 eixos) usadas para preencher o valor automaticamente quando uma praça detectada pelo mapa (OpenStreetMap) fica próxima de um ponto desta lista. Os valores são uma semente e podem estar desatualizados; substitua por uma exportação oficial da ANTT/concessionárias quando quiser. O app sempre permite editar o valor do pedágio registrado.",
+  "pedagios": [
+    { "name": "Pedágio Arujá (Dutra, BR-116)", "lat": -23.3960, "lng": -46.3210, "price": 10.20 },
+    { "name": "Pedágio Jacareí (Dutra, BR-116)", "lat": -23.3010, "lng": -45.9650, "price": 10.20 },
+    { "name": "Pedágio Moreira César (Dutra, BR-116)", "lat": -22.9520, "lng": -45.2100, "price": 10.20 },
+    { "name": "Pedágio Itatiaia (Dutra, BR-116)", "lat": -22.4890, "lng": -44.5760, "price": 10.20 },
+    { "name": "Pedágio Viúva Graça (Dutra, BR-116)", "lat": -22.6760, "lng": -43.8870, "price": 10.20 },
+    { "name": "Pedágio Bandeirantes (SP-348)", "lat": -23.0190, "lng": -47.1360, "price": 11.40 },
+    { "name": "Pedágio Anhanguera (SP-330)", "lat": -22.8710, "lng": -47.2050, "price": 9.80 },
+    { "name": "Pedágio Castello Branco (SP-280)", "lat": -23.4520, "lng": -47.2000, "price": 9.60 }
+  ]
+}
