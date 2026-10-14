@@ -27,6 +27,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<LocationService>();
         builder.Services.AddSingleton<ISpeechToTextService, SpeechToTextService>();
         builder.Services.AddSingleton<IRoutingService, OsmRoutingService>();
+        builder.Services.AddSingleton<IPlaceSearchService, PhotonPlaceSearchService>();
+        builder.Services.AddSingleton<SavedPlacesService>();
         builder.Services.AddSingleton<VoiceGuideService>();
 
         // --- Boas-vindas / criação do perfil local ---

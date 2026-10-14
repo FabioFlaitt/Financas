@@ -27,35 +27,38 @@ public sealed class OsmRoutingService : IRoutingService
 
     public async Task<PlannedRoute?> PlanAsync(Location origin, Location destination, CancellationToken ct = default)
     {
-        var (path, steps) = await GetRouteAsync(origin, destination, ct);
-        if (path.Count < 2) return null;
+        var route = await GetRouteAsync(origin, destination, ct);
+        if (route.Path.Count < 2) return null;
 
-        var tolls = await GetTollsAsync(path, ct);
-        return new PlannedRoute(path, tolls, steps);
+        var tolls = await GetTollsAsync(route.Path, ct);
+        return new PlannedRoute(route.Path, tolls, route.Steps, route.DistanceKm, route.DurationMinutes);
     }
 
     // ---- rota (OSRM) ----
 
-    private async Task<(List<Location> Path, List<NavStep> Steps)> GetRouteAsync(Location origin, Location destination, CancellationToken ct)
+    private async Task<(List<Location> Path, List<NavStep> Steps, double DistanceKm, double DurationMinutes)> GetRouteAsync(Location origin, Location destination, CancellationToken ct)
     {
         try
         {
             var url = $"{OsrmUrl}{Inv(origin.Longitude)},{Inv(origin.Latitude)};{Inv(destination.Longitude)},{Inv(destination.Latitude)}?overview=full&geometries=polyline&steps=true";
             using var response = await _http.GetAsync(url, ct);
-            if (!response.IsSuccessStatusCode) return (new(), new());
+            if (!response.IsSuccessStatusCode) return (new(), new(), 0, 0);
 
             await using var stream = await response.Content.ReadAsStreamAsync(ct);
             using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
             if (!doc.RootElement.TryGetProperty("routes", out var routes) || routes.GetArrayLength() == 0)
-                return (new(), new());
+                return (new(), new(), 0, 0);
 
             var route = routes[0];
             var geometry = route.TryGetProperty("geometry", out var g) ? g.GetString() : null;
             var path = string.IsNullOrEmpty(geometry) ? new List<Location>() : DecodePolyline(geometry!);
 
-            return (path, ParseSteps(route));
+            double distanceKm = route.TryGetProperty("distance", out var d) ? d.GetDouble() / 1000.0 : 0;
+            double durationMin = route.TryGetProperty("duration", out var t) ? t.GetDouble() / 60.0 : 0;
+
+            return (path, ParseSteps(route), distanceKm, durationMin);
         }
-        catch { return (new(), new()); }
+        catch { return (new(), new(), 0, 0); }
     }
 
     private static List<NavStep> ParseSteps(JsonElement route)

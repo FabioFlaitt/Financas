@@ -17,6 +17,8 @@
             <conv:PercentConverter x:Key="Percent" />
             <conv:InvertedBoolConverter x:Key="InvertBool" />
             <conv:IsNotNullConverter x:Key="IsNotNull" />
+            <conv:IsNullConverter x:Key="IsNull" />
+            <conv:FavoriteStarConverter x:Key="FavoriteStar" />
             <conv:HexColorConverter x:Key="HexColor" />
             <conv:TransactionAmountConverter x:Key="TxAmount" />
             <conv:TransactionTypeColorConverter x:Key="TxColor" />

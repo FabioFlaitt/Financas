@@ -2,41 +2,138 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:FinanceApp.Mobile.ViewModels"
+             xmlns:svc="clr-namespace:FinanceApp.Mobile.Services"
+             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
              x:Class="FinanceApp.Mobile.Views.TripStartPage"
              x:DataType="vm:TripStartViewModel"
              Title="Nova viagem"
              BackgroundColor="{AppThemeBinding Light=#F2F4F7, Dark=#101317}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="14">
+        <VerticalStackLayout Padding="16" Spacing="12">
+
             <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}"
                     BackgroundColor="#FDECEA" Stroke="#C62828" StrokeShape="RoundRectangle 10" Padding="12">
-                <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" />
+                <Label Text="{Binding ErrorMessage}" TextColor="#8B1A12" FontSize="12" />
             </Border>
 
-            <Label Text="Nome da viagem" FontSize="12" TextColor="#6E6E6E" />
-            <Entry Text="{Binding Name}" Placeholder="Ex.: São Paulo → Rio" />
+            <!-- Cartão de origem/destino (estilo navegação) -->
+            <Border BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}"
+                    Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}" StrokeShape="RoundRectangle 14" Padding="12">
+                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                    <!-- Origem -->
+                    <Label Grid.Row="0" Grid.Column="0" Text="○" FontSize="18" TextColor="#6E6E6E" VerticalOptions="Center" />
+                    <Border Grid.Row="0" Grid.Column="1" Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}"
+                            StrokeShape="RoundRectangle 8" Padding="10,8">
+                        <Label Text="{Binding OriginLabel}" FontSize="14" LineBreakMode="TailTruncation"
+                               TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" VerticalOptions="Center" />
+                    </Border>
+                    <!-- Inverter -->
+                    <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Text="⇅" FontSize="18" WidthRequest="40" HeightRequest="40"
+                            Padding="0" BackgroundColor="Transparent" TextColor="#0D47A1"
+                            Command="{Binding SwapCommand}" VerticalOptions="Center" />
 
-            <Label Text="Origem (opcional)" FontSize="12" TextColor="#6E6E6E" />
-            <Entry Text="{Binding Origin}" />
+                    <!-- Destino -->
+                    <Label Grid.Row="1" Grid.Column="0" Text="📍" FontSize="16" VerticalOptions="Center" />
+                    <Border Grid.Row="1" Grid.Column="1" Stroke="#C62828" StrokeShape="RoundRectangle 8" Padding="4,0">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <!-- Quando já tem destino escolhido, mostra o rótulo; senão, o campo de busca -->
+                            <Label Grid.Column="0" Text="{Binding DestinationLabel}" FontSize="14" Padding="6,8"
+                                   LineBreakMode="TailTruncation" VerticalOptions="Center"
+                                   IsVisible="{Binding DestinationLabel, Converter={StaticResource IsNotNull}}"
+                                   TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                            <Entry Grid.Column="0" Text="{Binding DestinationQuery}" Placeholder="Informe o destino ou toque no mapa"
+                                   IsVisible="{Binding DestinationLabel, Converter={StaticResource IsNull}}" />
+                            <Label Grid.Column="1" Text="✕" FontSize="14" Padding="8" VerticalOptions="Center" TextColor="#6E6E6E"
+                                   IsVisible="{Binding DestinationLabel, Converter={StaticResource IsNotNull}}">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ClearDestinationCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
 
-            <Label Text="Destino (opcional)" FontSize="12" TextColor="#6E6E6E" />
-            <Entry Text="{Binding Destination}" />
+            <!-- ETA / distância -->
+            <Border IsVisible="{Binding HasRoute}" BackgroundColor="#0D47A1" StrokeShape="RoundRectangle 12" Padding="14,10">
+                <HorizontalStackLayout Spacing="18" HorizontalOptions="Center">
+                    <Label Text="{Binding EtaLabel}" FontSize="16" FontAttributes="Bold" TextColor="White" />
+                    <Label Text="•" FontSize="16" TextColor="#BBD4F5" />
+                    <Label Text="{Binding DistanceLabel}" FontSize="16" FontAttributes="Bold" TextColor="White" />
+                </HorizontalStackLayout>
+            </Border>
 
-            <Label Text="Veículo (opcional)" FontSize="12" TextColor="#6E6E6E" />
-            <Entry Text="{Binding VehicleName}" Placeholder="Ex.: Corolla" />
+            <!-- Resultados da busca -->
+            <VerticalStackLayout IsVisible="{Binding HasResults}" Spacing="6"
+                                 BindableLayout.ItemsSource="{Binding SearchResults}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="svc:PlaceResult">
+                        <Border BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}"
+                                Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}" StrokeShape="RoundRectangle 10" Padding="12,10">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TripStartViewModel}}, Path=SelectResultCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="{Binding Label}" FontSize="14" LineBreakMode="TailTruncation"
+                                   TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}" />
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
 
-            <Label Text="Odômetro inicial em km (opcional)" FontSize="12" TextColor="#6E6E6E" />
-            <Entry Text="{Binding StartOdometerText}" Keyboard="Numeric" Placeholder="Ex.: 45230" />
+            <!-- Recentes e favoritos -->
+            <VerticalStackLayout IsVisible="{Binding ShowSuggestions}" Spacing="6">
+                <Label Text="Recentes e favoritos" FontSize="12" TextColor="#6E6E6E" />
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Suggestions}" Spacing="6">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="svc:SavedPlace">
+                            <Border BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1F24}"
+                                    Stroke="{AppThemeBinding Light=#E6E8EC, Dark=#2A2F36}" StrokeShape="RoundRectangle 10" Padding="12,10">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                    <Label Grid.Column="0" Text="🕑" FontSize="14" VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{Binding Label}" FontSize="14" LineBreakMode="TailTruncation"
+                                           VerticalOptions="Center" TextColor="{AppThemeBinding Light=#212121, Dark=#F5F7FA}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TripStartViewModel}}, Path=SelectSuggestionCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Grid.Column="2" Text="{Binding IsFavorite, Converter={StaticResource FavoriteStar}}" FontSize="18"
+                                           VerticalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TripStartViewModel}}, Path=ToggleFavoriteCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
 
-            <Label Text="Preço do combustível por litro (opcional)" FontSize="12" TextColor="#6E6E6E" />
-            <Entry Text="{Binding FuelPriceText}" Keyboard="Numeric" Placeholder="Ex.: 5,89" />
+            <!-- Mapa: tocar para escolher o destino / ver a prévia da rota -->
+            <Border StrokeShape="RoundRectangle 14" Padding="0" HeightRequest="260">
+                <maps:Map x:Name="PlanMap" IsShowingUser="True" MapType="Street" />
+            </Border>
+            <Label Text="Toque no mapa para marcar o destino." FontSize="11" TextColor="#919191" HorizontalTextAlignment="Center" />
+
+            <!-- Detalhes opcionais -->
+            <Label Text="Detalhes (opcional)" FontSize="12" TextColor="#6E6E6E" Margin="0,4,0,0" />
+            <Entry Text="{Binding Name}" Placeholder="Nome da viagem (ex.: Férias no litoral)" />
+            <Entry Text="{Binding VehicleName}" Placeholder="Veículo (ex.: Corolla)" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Entry Grid.Column="0" Text="{Binding StartOdometerText}" Keyboard="Numeric" Placeholder="Odômetro (km)" />
+                <Entry Grid.Column="1" Text="{Binding FuelPriceText}" Keyboard="Numeric" Placeholder="Combustível R$/L" />
+            </Grid>
 
             <Button Text="Iniciar viagem" Command="{Binding StartCommand}" BackgroundColor="#0D47A1"
-                    TextColor="White" CornerRadius="12" Margin="0,8,0,0" />
-
-            <Label Text="Ao iniciar, você poderá ativar o rastreamento por GPS para mapear a rota e os quilômetros."
-                   FontSize="11" TextColor="#919191" HorizontalTextAlignment="Center" />
+                    TextColor="White" CornerRadius="12" Margin="0,8,0,0"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBool}}" />
 
             <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#0D47A1" />
         </VerticalStackLayout>

@@ -83,6 +83,26 @@ public class IsNotNullConverter : IValueConverter
         => throw new NotSupportedException();
 }
 
+/// <summary>true quando o valor é nulo (ou string vazia). Útil para mostrar algo "enquanto não há X".</summary>
+public class IsNullConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is null || (value is string s && string.IsNullOrEmpty(s));
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>bool -> estrela cheia (favorito) ou vazia.</summary>
+public class FavoriteStarConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is true ? "★" : "☆";
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
 /// <summary>TransactionDto -> valor com sinal ("+R$ 100,00" / "-R$ 50,00") conforme o tipo.</summary>
 public class TransactionAmountConverter : IValueConverter
 {
