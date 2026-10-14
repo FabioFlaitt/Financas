@@ -26,8 +26,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<FinanceApiClient>();
         builder.Services.AddSingleton<LocationService>();
         builder.Services.AddSingleton<ISpeechToTextService, SpeechToTextService>();
-        builder.Services.AddSingleton<AppSettingsService>();
-        builder.Services.AddSingleton<IRoutingService, TollGuruRoutingService>();
+        builder.Services.AddSingleton<IRoutingService, OsmRoutingService>();
 
         // --- Boas-vindas / criação do perfil local ---
         builder.Services.AddTransient<WelcomeViewModel>();

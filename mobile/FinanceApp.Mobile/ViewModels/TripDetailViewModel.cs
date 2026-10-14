@@ -95,7 +95,6 @@ public partial class TripDetailViewModel : ObservableObject
     {
         if (Trip is null) return;
         if (string.IsNullOrWhiteSpace(Trip.Origin) || string.IsNullOrWhiteSpace(Trip.Destination)) return;
-        if (!await _routing.IsConfiguredAsync()) return;
 
         try
         {
